@@ -2,11 +2,11 @@
 main:
   - title: "Quick-Start Guide"
     url: https://mmistakes.github.io/minimal-mistakes/docs/quick-start-guide/
-  # - title: "About"
-  #   url: https://mmistakes.github.io/minimal-mistakes/about/
-  # - title: "Sample Posts"
-  #   url: /year-archive/
-  # - title: "Sample Collections"
-  #   url: /collection-archive/
-  # - title: "Sitemap"
-  #   url: /sitemap/
+  - title: "TIL"
+    url: https://woong9149.github.io/TIL
+#   - title: "Data Structure"
+#     url: https://woong9149.github.io/DataStructure
+#   - title: "Algorithm"
+#     url: https://woong9149.github.io/Algorithm
+#   - title: "기타"
+#     url: https://woong9149.github.io/ETC
