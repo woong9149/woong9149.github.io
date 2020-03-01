@@ -96,7 +96,7 @@ Response headers에  Content-Encoding을 보면 gzip으로 되있음.
 크롬 - 개발자도구 -네트워크 탭
 에서 데이터 용량을 볼 수 있다.(Size)
   
-Cmd +shift+R => 캐시가 삭제 됨( 강제 re-load)
+**Cmd +shift+R** => 캐시가 삭제 됨( 강제 re-load)
   
 # 미들웨어의 실행 순서
 
