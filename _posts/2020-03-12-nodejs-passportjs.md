@@ -1,5 +1,5 @@
 ---
-title: "[Nodejs-passport.js]생활코딩"
+title: "[생활코딩]Nodejs-passport.js"
 layout: single
 author_profile: true
 read_time: true
