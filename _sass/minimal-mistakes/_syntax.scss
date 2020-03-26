@@ -26,7 +26,7 @@ figure.highlight {
   margin-bottom: 0;
   font-size: 1em;
   border: 0;
-
+  border-radius: $border-radius;
   td {
     padding: 0;
     width: calc(100% - 1em);
@@ -116,7 +116,7 @@ figure.highlight {
   }
   .gh {
     /* Generic.Heading */
-    color: $base05;
+    color: gray;
     font-weight: bold;
   }
   .gi {
@@ -195,7 +195,7 @@ figure.highlight {
   }
   .ni {
     /* Name.Entity */
-    color: $base05;
+    color: gray;
   }
   .ne {
     /* Name.Exception */
@@ -207,7 +207,7 @@ figure.highlight {
   }
   .nl {
     /* Name.Label */
-    color: $base05;
+    color: gray;
   }
   .nn {
     /* Name.Namespace */
@@ -219,7 +219,7 @@ figure.highlight {
   }
   .py {
     /* Name.Property */
-    color: $base05;
+    color: gray;
   }
   .nt {
     /* Name.Tag */
@@ -235,7 +235,7 @@ figure.highlight {
   }
   .w {
     /* Text.Whitespace */
-    color: $base05;
+    color: gray;
   }
   .mf {
     /* Literal.Number.Float */
@@ -259,7 +259,7 @@ figure.highlight {
   }
   .sc {
     /* Literal.String.Char */
-    color: $base05;
+    color: gray;
   }
   .sd {
     /* Literal.String.Doc */
@@ -299,7 +299,7 @@ figure.highlight {
   }
   .bp {
     /* Name.Builtin.Pseudo */
-    color: $base05;
+    color: gray;
   }
   .vc {
     /* Name.Variable.Class */
