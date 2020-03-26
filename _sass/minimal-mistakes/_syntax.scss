@@ -50,7 +50,7 @@ figure.highlight {
 
   pre {
     margin: 0;
-Background-color : gray;
+Background-color : #f6f8fa;
   }
 }
 
@@ -88,7 +88,7 @@ Background-color : gray;
   }
   .p {
     /* Punctuation */
-    color: gray;
+    color: $base05;
   }
   .cm {
     /* Comment.Multiline */
