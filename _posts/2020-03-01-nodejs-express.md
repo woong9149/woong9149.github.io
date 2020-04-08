@@ -1,5 +1,5 @@
 ---
-title: "[Nodejs-express] 생활코딩"
+title: "[Nodejs] 생활코딩 Nodejs-express 1"
 layout: single
 author_profile: true
 read_time: true
@@ -28,7 +28,7 @@ tags:
 > npm install express —save
 
 **기본사용법** 
-```
+```javascript
 
 const express = require(‘express’ )
 const app = express()
@@ -88,7 +88,9 @@ body를 설명하는 데이터를 header.
   
 # 데이터 압축하기
 
-```app.use(compression()); //compression()은 미들웨어를 리턴해서 app.use에 장착```
+```javascript
+app.use(compression()); //compression()은 미들웨어를 리턴해서 app.use에 장착
+```
 웹서버가 웹브라우저에 응답할때 데이터의 용량이 크면 데이터를 압축을 할 수 있다.    
 압축을하고 푸는것이 네트워크 전송 비용보다 싸고 빠르다.    
 Response headers에  Content-Encoding을 보면 gzip으로 되있음.  
@@ -117,7 +119,7 @@ next를 호출받아 다음 미들웨어를 실행할지 안할지를 결정할 
 # 에러처리방법
 
 없는 페이지를 찾을 때,
-```
+```javascript
 app.use(function(req,res,next){
   res.status(404).send('Sorry cant find that !');
 })

@@ -1,5 +1,5 @@
 ---
-title: "[생활코딩]Nodejs-passport.js"
+title: "[Nodejs]생활코딩 Nodejs-passport.js"
 layout: single
 author_profile: true
 read_time: true
@@ -37,7 +37,7 @@ tags:
 
 **사용방법**  
 
-```
+```javascript
 const passport = require('passport'),
       LocalStrategy = require('passport-local').Strategy;
 ```
@@ -48,7 +48,7 @@ Passport를 사용하기 위해 세 가지를 구성해야 한다.
 3. Session (optional)(세션(선택사항))  
 
 **Strategies**  
-```
+```javascript
 var passport = require('passport')
   , LocalStrategy = require('passport-local').Strategy; // Passport-local방식을 사용
 
@@ -90,7 +90,7 @@ strategy는 verify callback이 필요하다. 사용자의 요청에 담긴 정�
 
 **Middleware**
 
-```
+```javascript
 app.configure(function() {
   app.use(express.static('public'));
   app.use(express.cookieParser());
@@ -108,7 +108,7 @@ app.configure(function() {
 이후의 요청에는 인증정보가아니라 session을 식별하는 고유한 cookie가 포함된다
 로그인 세션을 지원하기위해 session과 user인스턴스를 **serializeUser**  및 **deserializeUser** 를 할 수 있다.
 
-```
+```javascript
 passport.serializeUser(function(user, done) {
   done(null, user.id);
 });
@@ -127,7 +127,7 @@ passport.deserializeUser(function(id, done) {
 # passport.js 인증 구현
 로그인 폼에서 전송한 데이터를 받는 쪽을 passport로 전환
 
-```
+```javascript
 app.post('/auth/login_process',
   passport.authenticate('local', {
       successRedirect : '/',//로그인이 됐을때
@@ -139,7 +139,7 @@ app.post('/auth/login_process',
 
 # passport.js 자격확인
 전송된 정보가 유효한지 여부를 파악하는 방법
-```
+```javascript
 module.exports = function(app){
 
 var authData = {
@@ -200,10 +200,10 @@ return passport;
 
 
 ```
+<br/>
 
-passport.js 로그인  및 로그아웃
-
-```
+# passport.js 로그인  및 로그아웃   
+```javascript
 const express = require('express');
 const router = express.Router();
 const template = require('../lib/template.js')
@@ -259,7 +259,7 @@ module.exports = module.exports = function(passport){
 ```
 
 **main.js**
-```
+```javascript
 const express = require('express')
 const app = express(); //express는 application 객체를 리턴해준다
 const fs = require('fs');
@@ -336,7 +336,7 @@ app.listen(3000,function(){
 > npm install -s  connect-flash
 
 **사용방법**  
-```
+```javascript
 app.use(flash());//flash는 내부적으로 session을 쓰기때문에 session다음에 미들웨어를 실행해야함
 app.get('/flash', function(req,res){
   //set a flash message by passing the key, followed by the value, tothe req.flash()
@@ -350,7 +350,7 @@ app.get('/flash-display', function(req,res){
   res.send(fms)
 })
 ```
- ```
+ ```javascript
  passport.authenticate('local', {
         successRedirect : '/',//로그인이 됐을때
         failureRedirect: '/auth/login',//로그인이 안됐을때
