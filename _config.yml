@@ -189,11 +189,11 @@ whitelist:
 category_archive:
   type: liquid
   path: /categories/
-  layout: categories
+#   layout: categories
 tag_archive:
   type: liquid
   path: /tags/
-  layout: tags
+#   layout: tags
 compress_html:
   clippings: all
   ignore:
