@@ -1,5 +1,5 @@
 ---
-title: "[MySQL] case when"
+title: "[MySQL] case when문"
 layout: single
 author_profile: true
 read_time: true
