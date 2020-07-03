@@ -13,6 +13,32 @@ layout: default
     {% include breadcrumbs.html %}
   {% endunless %}
 {% endif %}
+
+
+<div id="main" role="main">
+  {% include sidebar.html %}
+
+  <div class="archive">
+    {% unless page.header.overlay_color or page.header.overlay_image %}
+      <h1 id="page-title" class="page__title">{{ page.title }}</h1>
+    {% endunless %}
+    {{ content }}
+  </div>
+  <div>
+    <div class="sidebar-nav-item">Category</div>
+    <nav class="content-ul">
+      {% for category in site.categories %}
+      <a href="{{ root_url }}/{{ site.category_dir }}#{{ category | first }}"
+        class="sidebar-nav-item pl-3rem">
+                            <span class="name">
+                                {{ category | first }}
+                            </span>
+        <span class="badge">{{ category | last | size }}</span>
+      </a>
+      {% endfor %}
+    </nav>
+  </div>
+</div>
 <div>
   <div class="sidebar-nav-item">Category</div>
   <nav class="content-ul">
@@ -26,15 +52,4 @@ layout: default
     </a>
     {% endfor %}
   </nav>
-</div>
-
-<div id="main" role="main">
-  {% include sidebar.html %}
-
-  <div class="archive">
-    {% unless page.header.overlay_color or page.header.overlay_image %}
-      <h1 id="page-title" class="page__title">{{ page.title }}</h1>
-    {% endunless %}
-    {{ content }}
-  </div>
 </div>
