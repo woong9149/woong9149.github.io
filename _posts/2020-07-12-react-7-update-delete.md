@@ -239,3 +239,35 @@ else if(this.state.mode === 'update'){
 ```
 
 * UpdateContent 컴포넌트에서 넘어온 _id,_title,_desc를 받아 반복문을 이용해  contents 중 id 값이 _id와 일치하는 요소의 값에 각각 _title, _desc 를 대입해준다.
+
+# Delete 구현
+*  버튼을 눌렀을 때는, confirm창을 띄워서 사용자의 실수를 방지해준다.   
+*  **splice( )** 메소드를 이용해 배열의 삭제할 요소를 삭제하고, 나머지 요소들로 setState 해준다.
+
+```python
+<Control onChangeMode={function(_mode) {
+          if(_mode === 'delete'){
+            if(window.confirm("realy?")){
+              var _contents = Array.from(this.state.contents);
+              var i = 0;
+              while(i < this.state.contents.length){
+                if(_contents[i].id === this.state.selected_content_id){
+                  _contents.splice(i,1);
+                  break;
+                }
+                i = i + 1;
+              }
+              this.setState({
+                mode:'welcome',
+                contents:_contents
+              });
+              alert('deleted!');
+            }
+          } else {
+            this.setState({
+              mode : _mode
+            });
+          }
+          
+}.bind(this)}></Control>
+```
