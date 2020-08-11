@@ -19,6 +19,30 @@ related: true
 
 나는 운이 좋게도 **AWS EDUCATE** 계정으로 테스트를 했다.
 
+## RDS 생성방법
+**1. AWS 로그인 후 콘솔로 접속해서 RDS를 검색한다.**
+<img width="1280" alt="스크린샷 2020-08-11 오후 5 53 46" src="https://user-images.githubusercontent.com/42554237/89910163-dea03580-dc2a-11ea-86c0-bb2045ff323b.png">
+
+**2. '데이터베이스 성생하기' 를 클릭 한다.**
+<img width="1254" alt="스크린샷 2020-08-11 오후 11 15 53" src="https://user-images.githubusercontent.com/42554237/89910166-df38cc00-dc2a-11ea-89cf-81965d961e2f.png">
+
+**3. 데이터베이트 엔진과 사양,설정들을 선택한다.**
+<img width="1254" alt="스크린샷 2020-08-11 오후 11 16 37" src="https://user-images.githubusercontent.com/42554237/89910169-dfd16280-dc2a-11ea-8444-5d124824c2e0.png">
+
+'설정'에 있는 항목들은 이후 애플리케이션과 연동하거나 DB Tool과 연동할 때 필요한 정보들이다.
+<img width="1254" alt="스크린샷 2020-08-11 오후 11 17 00" src="https://user-images.githubusercontent.com/42554237/89910172-dfd16280-dc2a-11ea-87cc-8cee51eccbfe.png">
+
+<img width="1254" alt="스크린샷 2020-08-11 오후 11 17 45" src="https://user-images.githubusercontent.com/42554237/89911198-19ef3400-dc2c-11ea-95e8-b44197da7198.png">
+
+**4. 설정 완료 후 '데이터베이스 생성하기' 버튼을 클릭한다.**
+<img width="773" alt="스크린샷 2020-08-11 오후 11 19 35" src="https://user-images.githubusercontent.com/42554237/89911209-1e1b5180-dc2c-11ea-9aae-b5a850f3aecf.png">
+
+**5.데이터 베이스가 생성 되는 동안, MySQL에서 한글을 사용하기 위한 파라미터 설정을 해준다.**
+<img width="773" alt="스크린샷 2020-08-11 오후 11 20 19" src="https://user-images.githubusercontent.com/42554237/89911214-1f4c7e80-dc2c-11ea-9159-4895ed0c0002.png">
+
+**6.파라미터 그룹을 생성하고, 'char' 와 'collation'을 검색해 인코딩 설정을 할 수 있는 항목은 모두 'utf8'로 설정 해준다.(collation은 utf8_general_ci)**
+<img width="773" alt="스크린샷 2020-08-11 오후 11 21 06" src="https://user-images.githubusercontent.com/42554237/89911216-1fe51500-dc2c-11ea-807c-231b52ca64e7.png">
+
 ## RDS vs EC2
 EC2에 DB를 설치해서 사용하는 것과 RDS를 사용하는 것이 어떻게 다른 것인지 생각해 볼 필요가 있다.   
 **RDS는** DB의 설정, 운영, 백업 등의 기능이 자동으로 가능한 DB 전용 서버이다.   
