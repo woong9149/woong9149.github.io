@@ -6,6 +6,12 @@ read_time: true
 comments: true
 share: true
 related: true
+categories:
+- nodejs
+- oreilly
+tags:
+- nodejs
+- oreilly
 ---
 
 # Hello, World ! 띄우기
