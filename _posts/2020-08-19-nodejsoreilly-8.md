@@ -87,3 +87,59 @@ executing immediate: so immediate
 setImmediate() 는 바로 스케줄링 된 것을 취소할 수 있는**Immediate 객체**를 반환한다.
    
 **Note**:  `setImmediate()` 를 `process.nextTick()` 과 혼동하면 안된다. 첫 째로 `process.nextTick()` 은 모든 스케줄링된 I/O 이전뿐만 아니라 설정한 모든 Immediate 이전에 실행 된다는 점 둘 째로 `process.nextTick()`은 취소할 수 없으므로 일단 `process.nextTick()`으로 코드를 실행하도록 스케줄링하면 일반 함수처럼 실행을 멈출 수 없다는 점이 그 차이 점이다.
+
+# "무한루프" 실행 ~ `setInterval()`
+여러 번 실행해야 하는 코드 블록이 있다면 `setInterval()` 을 사용할 수 있다. `setInterval()`은 두 번째 인자로 지정한 밀리 초 단위의 지연시간으로 무한대로 실행할 함수를 인자로 받는다. `setTimeout()` 처럼 지연시간 다음에 부가적인 인자를 지정할 수 있고 이는 함수 호출에 전달될 것이다. 또한 `setTimeout()` 처럼 작업이 이벤트 루프에서 진행 중일 수 있으므로 지연시간이 보장되지 않는다. 그러므로 대략적인 지연시간으로 생각해야한다.   
+예제
+```python
+function intervalFunc(){
+	console.log('Cant stop me now !');
+}
+
+setInterval(intervalFunc,1500);
+```
+예제에서 `intervalFunc()` 는 중단하기 전까지는 15000밀리 초(1.5초)마다 실행 될 것이다.   
+`setTimeout()` 처럼 `setInterval()`도 설정한 인터벌을 참조하고 수정하는 데 사용할 수 있는 Timeout 객체를 반환한다.
+
+# 취소하기
+Timeout 이나 Immediate 객체를 취소하고 싶다면 어떻게 해야할까? `setTimeout()`, `setImmediate()`, `setInterval()` 은 설정한 Timeout 이나 Immediate 객체를 참조하는 타이머 객체를 반환한다. 각각의 clear 함수에 이 객체들을 전달해서 해당 객체의 실행을 완전히 중단할 수 있다. 각각의 함수는 `clearTimeout()`, `clearImmediate()`, `clearInterval() `이다.
+
+예제
+
+```python
+const timeoutObj = setTimeout(() => {
+	console.log('timeout beyond time');
+},1500);
+
+const immediateObj = setImmediate(() => {
+	console.log('immediately executing immediate');
+})
+
+const intervalObj = setInterval( () => {
+	console.log('interviewing the interval');
+}, 500);
+
+clearTimeout(timeoutObj);
+clearImmediate(immediateObj);
+clearInterval(intervalObj);
+```
+
+# 타임아웃 감춰두기
+여기서 `Timeout` 객체는 `setTimeout`과 `setInterval `이 반환했다는 점을 기억해야 한다.  `Timeout`  객체는  `Timeout` 의 동작을 강화하는 두 가지 함수 `unref()`와 `ref()`를 제공한다. `set` 함수로 스케줄링 된 `Timeout` 객체가 있다면 이 객체에서 `unref()`를 호출할 수 있다. 이는 동작을 다소 변경하는데, **실행할 코드가 이것밖에 남지 않았다면 `Timeout` 객체를 호출하지 않는다.** `Timeout` 객체는 프로세스를 유지하지 않고 실행을 기다린다.   
+
+비슷하게 `unref()` 가 호출된 Timeout 객체에서 ref()를 호출하면 `unref()`의 동작을 제거해서 Timeout 객체의 실행을 보장할 수 있다. 하지만 선능 문제로 초기 동작을 완전히 똑같이 복구하는 것은 아니다.   
+
+예제
+```python
+const timerObj = setTimeout( () => {
+	console.log('will i run?');
+});
+
+//이 부분만 있다면 이 타임아웃이 프로그램을 종료되지 않게 하고 있으므로, 위 타임아웃이 실행되지 않게 한다.
+timerObj.unref();
+
+//immediate 안에서 ref()를 실행해서 다시 실행 상태로 만들 수 있다.
+setImmediate(() => {
+	timerObj.ref();
+});
+```
