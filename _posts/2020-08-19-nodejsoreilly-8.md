@@ -88,8 +88,10 @@ setImmediate() 는 바로 스케줄링 된 것을 취소할 수 있는**Immediat
    
 **Note**:  `setImmediate()` 를 `process.nextTick()` 과 혼동하면 안된다. 첫 째로 `process.nextTick()` 은 모든 스케줄링된 I/O 이전뿐만 아니라 설정한 모든 Immediate 이전에 실행 된다는 점 둘 째로 `process.nextTick()`은 취소할 수 없으므로 일단 `process.nextTick()`으로 코드를 실행하도록 스케줄링하면 일반 함수처럼 실행을 멈출 수 없다는 점이 그 차이 점이다.
 
+
 # "무한루프" 실행 ~ `setInterval()`
 여러 번 실행해야 하는 코드 블록이 있다면 `setInterval()` 을 사용할 수 있다. `setInterval()`은 두 번째 인자로 지정한 밀리 초 단위의 지연시간으로 무한대로 실행할 함수를 인자로 받는다. `setTimeout()` 처럼 지연시간 다음에 부가적인 인자를 지정할 수 있고 이는 함수 호출에 전달될 것이다. 또한 `setTimeout()` 처럼 작업이 이벤트 루프에서 진행 중일 수 있으므로 지연시간이 보장되지 않는다. 그러므로 대략적인 지연시간으로 생각해야한다.   
+
 예제
 ```python
 function intervalFunc(){
@@ -101,11 +103,11 @@ setInterval(intervalFunc,1500);
 예제에서 `intervalFunc()` 는 중단하기 전까지는 15000밀리 초(1.5초)마다 실행 될 것이다.   
 `setTimeout()` 처럼 `setInterval()`도 설정한 인터벌을 참조하고 수정하는 데 사용할 수 있는 Timeout 객체를 반환한다.
 
+
 # 취소하기
 Timeout 이나 Immediate 객체를 취소하고 싶다면 어떻게 해야할까? `setTimeout()`, `setImmediate()`, `setInterval()` 은 설정한 Timeout 이나 Immediate 객체를 참조하는 타이머 객체를 반환한다. 각각의 clear 함수에 이 객체들을 전달해서 해당 객체의 실행을 완전히 중단할 수 있다. 각각의 함수는 `clearTimeout()`, `clearImmediate()`, `clearInterval() `이다.
 
 예제
-
 ```python
 const timeoutObj = setTimeout(() => {
 	console.log('timeout beyond time');
