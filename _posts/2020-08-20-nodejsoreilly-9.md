@@ -153,3 +153,110 @@ req.write('data\n');
 req.end();
 ```
 `http.request `개체와 함께 비동기 파일 읽기 함수를 사용하지 않은 이유는 **비동기 함수를 호출하면 연결이 이미 닫힌 상태가 되어버려 아무런 파일 내용도 반환되지 않기 때문**이다. Apache나 다른 웹 서버들에서 흔히 기대하는 동작들이 Node HTTP 서버에서는 내장되어 있지 않다는 점에 유의해야 한다. 예를 들어, 웹 사이트를 암호로 보호할 경우 Apache에서는 사용자 이름과 암호를 물어보는 창이 나타나지만 Node HTTP 서버에서는 나타나지 않는다. 이 기능이 필요하다면, 이를 위한 코드를 작성해야 한다.
+
+# UDP/데이터그램 소켓
+TCP는 두 끝점이 통신을 하는 동안 계속 연결이 유지되어있어야 한다. UDP는 비연결형(connectionless) 프로토콜인데, 두 끝점 간에 연결이 보장되지 않는다는 것을 의미한다. 이러한 이유로 TCP에 비해 신뢰성과 견고함이 떠러진다. 반면에, 일반적으로 UDP는 TCP보다 빨라서 실시간 용도 또는 **VoIP**(Voice over Internet Protocol)처럼 TCP로 연결할 경우 신호 품질이 저하될 수 있는 기술들에서 더 많이 사용 된다.   
+
+Node 코어는 두 소켓 유형을 모두 지원한다. UDP 모듈 식별자는 dgram이다 :   
+`require('dgram');`   
+UDP 소켓을 만들기 위해서는 **createSocket** 메서드를 사용하면서 소켓 유형(**udp4** 또는 **udp6**)을 넘겨준다. 이벤트를 수신하기 위한 콜백 함수도 전달할 수 있다. TCP로 송신된 메시지와는 달리, **UDP를 사용하여 송신된 메시지는 반드시 문자열이 아닌 버퍼로 송신되어야 한다.**   
+
+**예제 3-6** 터미널에 입력된 메시지를 전송하는 데이터그램 클라이언트 
+```python
+var dgram = require('dgram');
+
+var client = dgram.createSocket("udp4");
+
+//터미널로부터 입력을 준비
+process.stdin.resume();
+
+process.stdin.on('data', function(data){
+    console.log(data.toString('utf8'));
+    client.send(data, 0, data.length, 8124,"examples.burningbird.net", function(err,bytes){
+            if(err)
+                console.log('error: ' + err);
+            else
+                console.log('successful');    
+    })
+})
+```
+*"examples.burningbird.net" 에는 자신이 UDP 서버를 구동하는 host 주소로 변경해야 함. 예를 들어, 클라이언트 서버가 같은 host면 localhost를 사용.*    
+
+예제3-6은 UDP 클라이언트 예제 코드다. 여기서 **process.stdin**을 통해 데이터를 입력 받아 UDP 소켓을 통해 송신한다. UDP 소켓은 버퍼만을 받으며, process.stdin 데이터가 버퍼이므로 문자열 인코딩을 설정할 필요가 없다는 점에 유의한다. 하지만 입력 내용을 되풀이하기 위해 **console.log** 메서드를 호출하려면 버퍼의 **toString** 메서드를 사용해서 버퍼를 문자열로 변환해야 한다.   
+
+예제 3-7처럼 UDP 서버는 클라이언트보다 훨씬 더 간단하다. 서버 애플리케이션에서는 소켓을 생성해서 특정 포트(8124)에 바인딩시키고 message 이벤트를 수신 대기하면 된다. 메시지가 도착하면 애플리케이션에서는 메시지와 송신자의 IP 주소 및 포트를 **console.log**로 출력한다. 버퍼에서 문자열로 자동  변환되므로, 메시지 출력 시 인코딩이 필요 없다.   
+소켓을 포트에 반드시 바인딩해야 하는 것은 아니지만, 바인딩을 하지 않을 경우에는 모든 포트에 대해 수신 대기를 시도한다.   
+
+**예제3-7** 8124 포트에 바인딩되어 이벤트를 수신 대기하는 UDP 소켓 서버
+```python
+var dgram = require('dgram');
+
+var server = dgram.createSocket("udp4");
+
+server.on("message", function(msg,rinfo){
+    console.log("Message: " + msg + " from " + rinfo.address + ":" + rinfo.port);
+});
+
+server.bind(8124);
+```
+메시지를 송신/수신한 후에 클라이언트나 서버에서 close 메서드를 호출하지 않았다. 클라이언트와 서버간에는 아무런 연결이 유지되지 않는 상태이지만, 소켓은 여전히 메시지를 송수신할 수 있다.
+
+# 스트림, 파이프, Readline
+지금까지의 소켓 간의 통신 스트림은 하부에 있는 stream 추상 인터페이스를 구현한 것이다. 스트림은 읽기, 쓰기 혹은 둘 다 가능하며, 모든 스트림은  **EventEmitter의 인스턴스**다.   
+중요한 것은 **process.stdin** 및 **process.stdout**을 비롯한 모든 통신 스트림이 stream 추상 인터페이스를 구현한 것이라는 점이다. 이 하부 인터페이스 덕분에 Node의 모든 스트림에서 사용 가능한 기본 기능들이 존재한다:   
+* setEncoding으로 스트림 데이터의 인코딩을 변경할 수 있다.
+* 스트림이 읽기, 쓰기 혹은 둘 다 가능한지를 확인할 수 있다.
+* 데이터 수신이나 연결 닫힘과 같은 스트림 이벤트를 잡아서 각각에 콜백 함수를 연결할 수 있다.
+* 스트림을 일시 중지하거나 재개할 수 있다.
+* 읽기 가능 스트림으로부터 쓰기 가능 스트림으로 데이터를 보낼 수 있다(pipe 가능).
+
+마지막 기능은 지금까지 다뤄본 적이 없는 것이다. pipe 기능을 확인하기 위한 간단한 방법은 REPL 세션을 열어서 다음과 같이 입력하는 것이다:   
+```
+process.stdin.resume();
+process.stdin.pipe(process.stdout);
+```
+그러면 이 시점부터 입력하는 모든 것들이 다시 되풀이 된다.       
+연속 데이터를 위해 출력 스트림을 열어둔 상태로 유지하고 싶으면, 출력 스트림에 { end:false } 옵션을 전달한다 :   
+`process.stdin.pipe(process.stdout, { end : false });`     
+읽기 가능한 스트림의 경우에는 readline이라는 개체를 추가로 사용할 수 있다. Readline 모듈은 다음과 같이 포함시킨다:      
+`var readline = require('readline');`   
+
+Readline 모듈은 줄 단위로 스트림을 읽을 수 있게 해준다. 하지만 이 모듈을 포함시키고 나면 인터페이스와 stdin 스트림을 닫기 전까지 Node 프로그램이 종료되지 않는다는 것에 주의해야 한다.   
+
+**예제3-8** Readline을 사용하여 간단한 명령어 기반 사용자 인터페이스 만들기   
+```python
+var readline = require('readline');
+
+//새 인터페이스 생성
+var interface = readline.createInterface(process.stdin,process.stdout, null);
+
+//질문을 물어봄
+interface.question(">>what is the meaning of life? ", function(answer){
+    console.log("About the meaning of life, you said " + answer);
+    interface.setPrompt(">>");
+    interface.prompt();
+})
+
+//인터페이스를 닫기 위한 함수
+function closeInterface(){
+    console.log('Leaving interface...');
+    process.exit();
+}
+
+// .leave 수신 대기
+interface.on('line', function(cmd){
+    if(cmd.trim() == '.leave'){
+        closeInterface();
+        return;
+    }else{
+        console.log("repeating command: " + cmd);
+    }
+    interface.setPrompt(">>");
+    interface.prompt();
+});
+
+interface.on('close', function(){
+    closeInterface();
+})
+```
+애플리케이션은 실행되자마자 질문을 물어본 다음, 답을 출력한다. 또한 명령어(\n 으로 끝나는 줄)를 수신 대기한다. **.leave** 명령이 들어오면 애플리케이션을 종료하고, 그 외에는 명령어와 프롬프트를 반복한다. **Ctrl + C**나 **Ctrl + D** 키를 눌러 애플리케이션을 강제 종료시켜도 된다.
