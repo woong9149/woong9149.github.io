@@ -42,14 +42,14 @@ console.log(result); // 5, 4, 3, 2, 1
 console.log(array); //5, 4, 3, 2, 1
 ```
 
-rever()를 사용하면 반환된 배열과 원본 배열 모두 순서가 반전된다.
+reverse() 를 사용하면 반환된 배열과 원본 배열 모두 순서가 반전된다.
 
 
 ## 4. slice(start?: number, end?: number): T[ ];
 어떤 배열의 start 부터 end 까지(end 미포함)에 대한 얕은 복사본을 새로운 배열 객체로 반환한다. 원본 배열은 바뀌지 않는다.
 ```python
 const array = [1, 2, 3, 4, 5];
-const result = array.splice(2,5)
+const result = array.slice(2,5)
 console.log(result); //[3, 4, 5]
 console.log(array); //[1, 2, 3, 4, 5];
 ```
@@ -59,7 +59,7 @@ console.log(array); //[1, 2, 3, 4, 5];
 splice( )는 원본 배열의 요소를 삭제 또는 교체하거나 새 요소를 추가하여 배열의 내용을 변경하는 것이다.   
 
 
-## 5. find(predicate: value:T, index: number, obj: T[ ]) => unknown, thisArg?: any): T | undefined;
+## 5. find(predicate( value:T, index: number, obj: T[ ]) => unknown, thisArg?: any): T | undefined;
 또는   
 `find<S extends T>(predicate: (this: void, value: T, index: number, obj: T[ ]) => value is S, thisArg?: any): S | undefined; `    
 주어진 판별 함수를 만족하는 첫 번째 요소의 값을 반환한다. 그런 요소가 없으면 undefined를 반환한다.
@@ -90,7 +90,7 @@ console.log(result); // Student {name: "C", age: 30. enrolled: true, score: 90 }
 
 ## 6. filter(callbackfn: (value: T, index: number, array: T[ ]) => unknown, thisArg?: any): T[ ];
 또는   
-`filter<S extends T>(callbackfn: (value: T, index: number, array: T[]) => value is S, thisArg?: any): S[];`
+`filter<S extends T>(callbackfn: (value: T, index: number, array: T[]) => value is S, thisArg?: any): S[];`   
  주어진 함수의 테스트를 통과하는 모든 요소를 모아 새로운 배열로 반환한다.   
  
  ```python
@@ -145,7 +145,7 @@ console.log(result);
 
 
 ## 8. some(callbackfn: (value: T, index: number, array: T[ ]) => unknown, thisArg?: any): boolean;
-배열 안의 어떤 요소라도 주어진 판별함수를 통과하는지를 테스트 한다.
+배열 안의 어떤 요소라도 주어진 판별함수를 통과하는지를 테스트 한다. boolean 값을 반환한다.
 ```python
 const Student = {
     constructor(name, age, enrolled, score){
@@ -203,7 +203,7 @@ console.log(result / students.length);
 
 
 ## 10. sort(compareFn?: (a: T, b: T) => number): this;
-배열의 요소를 적절한 위치에 정렬한후 그 배열을 반환한다. 정렬은 stable sort가 아닐 수 있다. 기본 정렬 순서는 문자열의 유니코드 코드 포인트를 따른다.
+배열의 요소를 적절한 위치에 정렬한 후 그 배열을 반환한다. 정렬은 stable sort가 아닐 수 있다. 기본 정렬 순서는 문자열의 유니코드 코드 포인트를 따른다.
 ```python
 const Student = {
     constructor(name, age, enrolled, score){
