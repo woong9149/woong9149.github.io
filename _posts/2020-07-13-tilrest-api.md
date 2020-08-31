@@ -99,7 +99,7 @@ HTTP 헤더에는 HTTP 바디의 컨텐츠 종류를 명시할 수 있다.
 **HATEOAS**   
 	: 애플리케이션의 상태는 Hyperlink를 이용해 전이되어야 한다.   
 		
-# 왜 Unifon Interface ?   
+# 왜 Uniform Interface ?   
 		
 **독립적 진화**   
 서버와 클라이언트가 각각 독립적으로 진화한다.   
