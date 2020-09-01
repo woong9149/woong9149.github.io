@@ -1,11 +1,17 @@
 ---
+title: "[Nodejs]O'REILLY 정리 - 12"
 layout: single
 author_profile: true
 read_time: true
 comments: true
 share: true
 related: true
-title: "[Nodejs]O'REILLY 정리 - 12"
+categories:
+- o'reilly
+- nodejs
+tags:
+- o'reilly
+- nodejs
 ---
 
 # Utilities 모듈과 개체 상속
@@ -27,3 +33,85 @@ console.log(util.inspect(jsdom, true, null, true));
 `node inspectjsdom.js > jsdom.txt`   
 
 Utilities 모듈에서 제공하는 메서드들은 여러 개가 있지만, 가장 많이 사용하게 되는 것이 바로 **util.inherits** 이다. util.inherits 함수는 두 개의 인수 constructor와 superConstructor를 받는다. 그 결과로 **constructor(생성자)** 는 **superconstructor(상위생성자)** 로 부터 기능을 상속 받는다.
+
+**예제 3-11** util.inherits 메서드를 통한 개체 상속   
+```python
+var util = require('util');
+
+//원래 개체를 정의
+function first(){
+    var self = this;
+    this.name = 'first';
+    this.test = function(){
+        console.log(self.name);
+    };
+}
+
+first.prototype.output = function(){
+    console.log(this.name);
+}
+
+function second(){
+    second.super_.call(this);
+    this.name = 'second';
+}
+util.inherits(second,first);
+
+var two = new second();
+
+function third(func){
+    this.name = 'third';
+    this.callMethod = func;
+}
+
+var three = new third(two.test);
+
+//모두 "second"를 출력해야 함
+two.output();
+two.test();
+three.callMethod();
+```
+
+각각 first, second, third라는 3개의 개체를 생성한다. first 개체는 test와 output이라는 두 개의 메서드를 가진다. test 메서드는 개체 내에 직접 정의된 반면, output 메서드는 이후 **prototype** 개체를 통해서 추가되었다. 개체에 메서드를 정의하는 데 두 기법을 모두 사용한 이유는 util.inherits로 상속 시에 중요한 사항을 보여주기 위한 것이다(실제 상속은 JavaScript에서 해주는 것이지만, **util.inherits에 의해 활성화된다**).   
+
+second 개체에는 다음 줄이 포함되어 있다:   
+`second.super_.call(this);`   
+second 개체 생성자에서 이 줄을 제거하면 second 개체의 output에 대한 호출은 성공하지만 test에 대한 호출은 오류가 발생해서 'test가 정의되지 않았다'는 메시지와 함께 Node 애플리케이션이 강제 종료된다.   
+
+call 메서드는 두 개체 간의 생성자를 연결하여 생성자뿐만 아니라, 상위 생성자도 호출되게 해준다. **상위 생성자는 상속된 개체의 생성자**다.   
+
+상위생성자를 호출해야 하는 이유는 **first가 생성되기 전까지는 test 메서드가 존재하지 않기 때문**이다. 하지만 output 메서드의 경우에는 call 메서드가 필요 없는데, first 개체의 prototype 개체 상에 직접 정의되었기 때문이다. second 개체가 first로부터 속성들을 상속시에 새롭게 추가된 메서드도 상속받는다.
+
+util.inherits의 내부를 살펴보면 **super_** 가 정의된 곳을 볼 수 있다 :   
+```python
+exports.inherits = function(ctor, superCtor){
+	ctor.super_ = superCtor;
+	ctor.prototype = Object.create(superCtor.prototype, {
+		constructor: {
+			value: ctor,
+			enumerable: false,
+			writable: true,
+			configurable: true
+		}
+	});
+}
+```
+
+super_는 util.inherits가 호출될 때 second 개체의 속성으로 할당된다:   
+
+`util.inherits(second, first);`    
+
+세 번째 개체인 third는 name 속성을 가지고 있다. third는 first나 second로부터 상속받지 않았지만, 인스턴스화될 때 함수가 전달되어야 한다. 이 함수는 third 개체가 가지고 있는 **callMethod** 속성에 할당된다. 코드에서 이 개체의 인스턴스를 생성 시에 two라는 개체 인스턴스의 test 메서드가 생성자로 전달된다:   
+
+`var three = new third(two.test);`   
+
+three.callMethod가 호출되면, 얼핏 생각하기에 "third"가 출력될 것 같지만, 실제로는 "second"가 출력되는데, 이것은 first 개체의 **self 참조**가 관련되어 있다.   
+
+**JavaScript에서 this는 개체 컨텍스트**로, 메서드가 전달되거나 이벤트 핸들러로 넘겨질 때 변경될 수 있다. **개체 메서드에 대한 데이터를 보존 가능한 유일한 방법은 this를 개체 변수(이 경우 self)로 할당한 다음, 개체의 함수 내에서 해당 변수를 사용하는 것**이다.   
+
+이 애플리케이션을 실행하면 다음과 같이 출력된다:   
+```
+second
+second
+second
+```
