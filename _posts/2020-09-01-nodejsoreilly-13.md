@@ -68,3 +68,53 @@ someobj.prototype.somemethod = function(){ this.emit('event') };
 ...
 someobjinstance.on('event', function() { } );
 ```
+
+**예제 3-13** EventEmitter로부터 상속받는 이벤트 기반 개체 생성
+
+```python
+var util = require('util');
+var eventEmitter = require('events').EventEmitter;
+var fs = require('fs');
+
+function inputChecker (name, file) {
+   this.name = name;
+   this.writeStream = fs.createWriteStream('./' + file + '.txt',
+      {'flags' : 'a',
+       'encoding' : 'utf8',
+       'mode' : 0666});
+};
+
+util.inherits(inputChecker,eventEmitter);
+
+inputChecker.prototype.check = function check(input) {
+  var command = input.toString().trim().substr(0,3);
+  if (command == 'wr:') {
+     this.emit('write',input.substr(3,input.length));
+  } else if (command == 'en:') {
+     this.emit('end');
+  } else {
+     this.emit('echo',input);
+  }
+};
+// testing new object and event handling
+var ic = new inputChecker('Shelley','output');
+
+ic.on('write', function(data) {
+   this.writeStream.write(data, 'utf8');
+});
+
+ic.on('echo', function( data) {
+   console.log(this.name + ' wrote ' + data);
+});
+
+ic.on('end', function() {
+   process.exit();
+});
+
+process.stdin.resume();
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', function(input) {
+    ic.check(input);
+});
+```
+예제 3-13은 애플리케이션 내에서는 새로운 개체인 inputChecker가 생성된다. 생성자는 사람 이름과 파일 이름 두 값을 받아서 사람 이름을 개체 변수로 할당하고, 파일 시스템 모듈의 createWriteStream 메서드를 사용하여 쓰기 가능한 스트림에 대한 참조도 생성한다.
