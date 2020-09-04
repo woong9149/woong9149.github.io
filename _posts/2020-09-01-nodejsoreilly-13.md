@@ -118,3 +118,8 @@ process.stdin.on('data', function(input) {
 });
 ```
 예제 3-13은 애플리케이션 내에서는 새로운 개체인 inputChecker가 생성된다. 생성자는 사람 이름과 파일 이름 두 값을 받아서 사람 이름을 개체 변수로 할당하고, 파일 시스템 모듈의 createWriteStream 메서드를 사용하여 쓰기 가능한 스트림에 대한 참조도 생성한다.
+EventEmitter 기능은 process.stdin.on 이벤트 처리기 메서드도 포함되어 있는데, process.stdin은 EventEmitter를 상속받는 수많은 Node 개체 중 하나이기 때문이다.   
+
+util.inherits를 다루는 것 처럼, 새로운 개체의 생성자를 EventEmitter에 연결시킬 필요가 없다. 예제의 **on**과 **emit**은 개체 인스턴스 속성이 아닌 prototype 메서드로 구성되어 있기 때문이다.   
+
+on 메서드는 사실 동일한 매개변수를 받는 **EventEmitter.addListener** 메서드를 단축시킨 것에 불과하다.
