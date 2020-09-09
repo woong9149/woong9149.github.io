@@ -127,3 +127,16 @@ list, ls, la 또는 ll 로 설치된 패키지와 종속 관계를 나열할 수
 npm 레지스트리에 아지 업로드되지 않은 버전의 모듈을 설치하고자 할 경우에는 Git repository에서 직접 설치하면 된다 :   
 
 > npm install repository주소
+
+## 사용자 정의 모듈 만들기
+클라이언트 JavaScript에서와 마찬가지로 재사용 가능한 JavaScript를 라이브러리로 분리할 수 있다. 차이점은 JavaScript를 Node에서 사용하기 위한 모듈로 변환하기 위해 몇 가지 추가적인 단계가 필요하다는 것이다.   
+
+문자열과 문자열 배열을 받아서  첫 번째 문자열을 배열 내의 각 문자열에 연결하는 concatArray라는 JavaScript 라이브러리 함수를 가지고 있다고 해보자 :   
+
+```python
+function concatArray(str, array) {
+	return array.map(function(element){
+		return str + ' '+ element;
+	});
+}
+```
