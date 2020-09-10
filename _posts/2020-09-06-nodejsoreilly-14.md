@@ -140,3 +140,23 @@ function concatArray(str, array) {
 	});
 }
 ```
+
+이 함수를 Node 에서 사용 가능한 JavaScript 라이브러리로 변환하려면 다음 코드와 같이 exports 개체를 사용하여 노출된 함수들 전부 내보내야 한다 :   
+
+```python
+exports.concatArray = function(str, array) {
+	return array.map(function(element){
+		return str + ' '+ element;
+	});
+}
+```
+
+Node 애플ㄷ리케이션에서 concatArray를 사용하려면, require를 사용하여 라이브러리를 가져온 다음 라이브러리를 변수 이름으로 할당한다. 라이브러리가 할당되고 나면 코드에서 노출된 함수를 호출할 수 있다 :    
+```python
+var newArray = require('./arrayfunctions.js');
+console.log(newArray.concatArray('hello', ['test1','test2']));
+```
+
+핵심은 두 가지다.   
+* 함수를 내보내기 위해 exports 개체를 사용한다.   
+* 함수에 접근하려면 라이브러리를 가져온 하나의 개체로 취급하여 변수로 할당하면 된다.
