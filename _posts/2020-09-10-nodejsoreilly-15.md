@@ -19,3 +19,44 @@ related: true
 초기의 Node에서는 비동기 기능이 1970년대에 등장한 개념인 Promise를 사용하여 만들어졌다. **Promise는 어떤 비동기 결과를 상징하는 개체**로 future, delay, deferred라고 부르기도 한다. CommonJS 디자인 모델에서는 promise 개념을 포괄하고 있다.   
 
 초기 Node 구현에서 promise는 **success**와 **error**라는 두 개의 이벤트만을 발생시키는 개체였다. 사용법은 간단한데, **비동기 동작이 성공하면 success 이벤트**가 발생되고, **실패한 경우에는 error 이벤**트가 발생된다. 해당 이벤트 이외의 다른 이벤트들은 발생되지 않으며, 개체는 success나 error 중 하나(모두는 안됨)를 한 번만 발생시킨다.
+
+```python
+var fs = require('fs');
+
+function test_and_load(filename){
+    var promise = new process.Promise();
+    fs.stat(filename).addCallback(function(stat){
+
+        //파일이 아닌 것은 걸러냄
+        if(!stat.isFile()){
+            promise.emitSuccess();
+            return;
+        }
+
+        //파일인 경우 읽어 들임
+        fs.readFile(filename).addCallback(function(data){
+            promise.emitSuccess(data);
+        }).addErrback(function(error){
+            promise.emitError(error);
+        });
+
+    }).addErrback(function(error){
+        promise.emitError(error);
+    });
+    return promise;
+}
+```
+**각 개체는 promise 개체를 반환한다**. 성공적인 결과를 처리하는 코드는 promise 개체의 **addCallback** 메서드에 함수로 전달되며 data라는 매개변수 하나를 가진다.    
+에러를 처리하는 코드는 promise 개체의 **addErrback** 메서드에 함수로 전달되며, error라는 유일한 매개변수를 받는다 :   
+```python
+var file = require('file');
+var promise = File.read('mydata.txt');
+propmise.addCallback(function(data){
+	//데이터 처리 로직
+	
+});
+promise.addErrback(function(err){
+	//오류 처리 로직
+})
+```
+promise 개체는 이벤트가 종료될 때 적절한 기능(결과를 조작할 수 있거나 에러가 처리되는 것중 하나)이 수행되었다는 것을 보증한다.
