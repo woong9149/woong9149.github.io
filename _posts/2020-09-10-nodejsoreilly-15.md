@@ -6,6 +6,14 @@ read_time: true
 comments: true
 share: true
 related: true
+categories:
+- o'reilly
+- nodejs
+- TIL
+tags:
+- o'reilly
+- nodejs
+- TIL
 ---
 
 # 제어흐름, 비동기 패턴, 예외 처리
@@ -59,4 +67,38 @@ promise.addErrback(function(err){
 	//오류 처리 로직
 })
 ```
-promise 개체는 이벤트가 종료될 때 적절한 기능(결과를 조작할 수 있거나 에러가 처리되는 것중 하나)이 수행되었다는 것을 보증한다.
+promise 개체는 이벤트가 종료될 때 적절한 기능(결과를 조작할 수 있거나 에러가 처리되는 것중 하나)이 수행되었다는 것을 보증한다.   
+
+promise 개체는 Node 버전 0.1.30에서 제거되었다. **Ryan Dahl**이 작성한 제거 사유는 다음과 같다:   
+> 많은 사람들(나 자신을 비롯한)은 개체를 생성할 필요가 없는 파일 시스템 동작에 대한 저수준 인터페이스만을 원하는 반면, promise와 유사하지만 어떻게든 다른 것을 원하는 사람들도 많은 것 같다. 따라서 promise 대신 최종 인수 콜백을 사용하도록 하고, 보다 나은 추상화 계층을 구축하는 것은 사용자 라이브러리에 맡기도록 하겠다.   
+
+**모든 비동기 메서드는 마지막 인수로 콜백 함수를 사용**하는 특징을 가지고 있다. 이 **콜백 함수의 첫번째 인수는 항상 error 개체**다.
+
+**예제 5-2** 최종 콜백 기능의 기반 구조
+```python
+var obj = function(){};
+
+obj.prototype.doSomething = function(arg1, arg2_){
+    var arg2 = typeof(arg2_) ==='string' ? arg2_ : null;
+
+    var callback_ = arguments[arguments.length - 1];
+    callback = (typeof(callback_) == 'function' ? callback_ : null);
+
+    if(!arg2)
+        return callback(new Error('second argument missing or not a string'));
+
+        callback(arg1);
+}
+
+var test = new obj();
+
+try {
+    test.doSomething('test',3.55,function(err,value){
+        if(err) throw err;
+
+        console.log(value);
+    })
+} catch (err) {
+    console.error(err);
+}
+```
