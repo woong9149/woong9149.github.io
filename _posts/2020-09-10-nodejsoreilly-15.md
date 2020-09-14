@@ -125,3 +125,59 @@ val2 = callFunctionB(val1);
 val3 = callFunctionC(val2);
 ```
 이 함수들은 이전 함수의 결과를 바로 뒤에 있는 함수로 전달하면서 순서대로 호출된다. 모든 함수가 동기 방식이므로, 함수 호출이 순서를 벗어나서 예기치 않은 결과를 가져오는 것을 걱정 할 필요가 없다.
+
+**예제 5-3** 순차적 동기 애플리케이션   
+```python
+var fs = require('fs');
+
+try{
+	var data = fs.readFileSync('./apples.txt','utf8');
+	console.log(data);
+	var adjData = data.replace(/[A|a]pple/g,'orange');
+	
+	fs.writeFileSync('./oranges.txt',adjData);
+}catch(err){
+console.error(err);
+}
+```
+예제 5-3은 이러한 순차 프로그래밍에서 상대적으로 흔히 볼 수 있는 케이스를 보여준다. 애플리케이션에서는 파일을 열어서 데이터를 가져온 후 "apple"을 모두 "orange"로 바꿔 데이터를 수정하기 위해 Node 파일 시스템메서드의 동기 버전(Sync)을 사용하고 있다.   
+
+문제가 발생했을 때 모듈 함수에서 내부적으로 오류를 처리한다고 확신할 수 없으므로, 깔끔하게(최소한 유익하게) 예외 처리를 할 수 있도록 모든 함수 호출을 try 블록으로 감쌌다 :   
+```
+{[Error : ENOENT, no such file or directory './apples.txt']
+	errno : 34,
+	code : ' ENOENT',
+	path: './apples.txt',
+	syscall:'open'}
+```
+별로 사용자에게 친절하지는 않지만, 최소한
+```
+node.js:201
+	throw e ; // process.nextTick error, or 'error' event on first tick
+```
+으로 시작하는 에러를 띄우는 거보다는 훨씬 낫다.   
+
+이러한 동기 순차 애플리케이션 패턴을 비동기 구현으로 변환하려면 몇 가지 수정이 필요하다. 먼저, 모든 함수를 대응되는 비동기 버전으로 바꿔야 한다. 하지만 각 함수들이 호출될 때 차단이 발생하지 않는다는 사실 역시도 고려해야 하는데, 이는 함수들이 서로 독립적으로 호출되는 경우에는 적합한 순서를 보장할 수 없다는 것을 의미한다. 각 함수가 적합한 순서대로 호출되도록 보장할 수 있는 유일한 방법은 **중첩 콜백(nested callback)** 을 사용하는 것 뿐이다.   
+**예제 5-4** 예제 5-3의 애플리케이션을 비동기 중첩 콜백으로 변환   
+```python
+var fs = require('fs');
+
+try {
+    fs.readFile('./apples2.txt','utf8',function(err,data){
+        
+        if (err) throw err;
+
+        var adjData = data.replace(/[A|a]pple/g,'orange');
+
+        fs.writeFile('.oranges.txt',adjData,function(err){
+            if (err) throw err;
+        });
+    });
+} catch (err) {
+    console.error(err);
+}
+```
+예제 5-4는 예제 5-3 애플리케이션의 비동기 버전이다. 모든 파일 시스템 함수 호출은 비동기 버전으로 교체되었으며, 중첩 콜백을 통해 함수들이 적합한 순서대로 호출된다.   
+
+예제 5-4에서 입력 파일을 열어서 읽는 동작이 끝나는 순간 마지막 매개변수로 전달된 콜백 함수가 호출된다. 이 콜백 함수에서는 오류가 null이 아닌지를 확인하고, null인 경우에는 바깥쪽에 있는 예외 처리 블록에서 catch하도록 예외를 throw 한다.   
+오류가 발생되지 않았으면 데이터가 처리되고 비동기 **writeFile 메서드**가 호출된다. 이 메서드의 콜백 함수는 매개변수를 하나만 가지는데, 바로 **error** 개체다. 이 개체가 null이 아니면 바깥쪽 예외 블록에서 처리되도록 throw한다.
