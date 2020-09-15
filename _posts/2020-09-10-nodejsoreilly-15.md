@@ -180,4 +180,56 @@ try {
 예제 5-4는 예제 5-3 애플리케이션의 비동기 버전이다. 모든 파일 시스템 함수 호출은 비동기 버전으로 교체되었으며, 중첩 콜백을 통해 함수들이 적합한 순서대로 호출된다.   
 
 예제 5-4에서 입력 파일을 열어서 읽는 동작이 끝나는 순간 마지막 매개변수로 전달된 콜백 함수가 호출된다. 이 콜백 함수에서는 오류가 null이 아닌지를 확인하고, null인 경우에는 바깥쪽에 있는 예외 처리 블록에서 catch하도록 예외를 throw 한다.   
-오류가 발생되지 않았으면 데이터가 처리되고 비동기 **writeFile 메서드**가 호출된다. 이 메서드의 콜백 함수는 매개변수를 하나만 가지는데, 바로 **error** 개체다. 이 개체가 null이 아니면 바깥쪽 예외 블록에서 처리되도록 throw한다.
+오류가 발생되지 않았으면 데이터가 처리되고 비동기 **writeFile 메서드**가 호출된다. 이 메서드의 콜백 함수는 매개변수를 하나만 가지는데, 바로 **error** 개체다. 이 개체가 null이 아니면 바깥쪽 예외 블록에서 처리되도록 throw한다.   
+만약 오류가 발생되면 다음과 유사하게 나타날 것이다:   
+```
+/home/examples/public_html/node/read2/js:11
+	if (err) throw err;
+Error: ENOENT, no such file or directory './boogabooga/oranges.txt'
+```
+에러 스택 추적을 원할 경우 Node error 개체의 stack 속성을 출력하면 된다 :   
+```python
+catch(err) {
+	consol;e.log(err.stack);
+}
+```
+
+순차 함수 호출을 하나 더 포함시키면 콜백 중첩 수준이 하나 더 추가된다.   
+
+**예제5-5** 디렉터리 내의 변경할 파일 목록을 가져오기   
+```python
+var fs = require('fs');
+
+var writeStream = fs.createWriteStream('./log.txt',
+                                        {'flag' : 'a',
+                                        'encoding' : 'utf8',
+                                        'mode':0666
+                                        });
+try {
+    //파일 목록 가져옴
+    fs.readdir('./data/', function(err,files){
+        //각 파일에 대해
+        files.forEach(function(name){
+            //내용을 수정
+            fs.readFile('./data/' + name, 'utf8', function(err,data){
+                if (err) throw err;
+                var adjData = data.replace(/somecompany\.com/g,'burningbird.net');
+
+                //파일에 기록
+                fs.writeFile('./data/' + name, addData, function(err){
+                    if(err) throw err;
+
+                    //로그 기록
+                    writeStream.write('changed '+ name + '\n', 'utf8', function(err){
+                        if (err) throw err;
+                    })
+                })
+            })
+        })
+    })
+} catch (err) {
+    console.error(utill.inspect(err));
+}
+```
+예제 5-5 에서는 디렉터리의 파일 목록에 접근한다. 각 파일에서는 문자열 **replace** 메서드를 사용하여 일반화해놓은 도메인명을 특정 도메인명으로 바꾸고, 결과는 원래 파일에 다시 쓰여진다. 쓰기 스트림을 사용해서 변경된 각 파일의 로그가 유지된다.   
+애플리케이션이 다음으로 넘어가기 전에 각 파일을 하나씩 처리하고 있는 것  처럼 보이지만, 비동기 메서드가 사용되어 여러번 실행 후 log.txt 파일을 확인해보면 파일들이 매번 다르게 마치 무작위 순서처럼 처리 되었다는 것을 알 수 있다.
