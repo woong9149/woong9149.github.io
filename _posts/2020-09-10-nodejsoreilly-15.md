@@ -232,4 +232,67 @@ try {
 }
 ```
 예제 5-5 에서는 디렉터리의 파일 목록에 접근한다. 각 파일에서는 문자열 **replace** 메서드를 사용하여 일반화해놓은 도메인명을 특정 도메인명으로 바꾸고, 결과는 원래 파일에 다시 쓰여진다. 쓰기 스트림을 사용해서 변경된 각 파일의 로그가 유지된다.   
-애플리케이션이 다음으로 넘어가기 전에 각 파일을 하나씩 처리하고 있는 것  처럼 보이지만, 비동기 메서드가 사용되어 여러번 실행 후 log.txt 파일을 확인해보면 파일들이 매번 다르게 마치 무작위 순서처럼 처리 되었다는 것을 알 수 있다.
+애플리케이션이 다음으로 넘어가기 전에 각 파일을 하나씩 처리하고 있는 것  처럼 보이지만, 비동기 메서드가 사용되어 여러번 실행 후 log.txt 파일을 확인해보면 파일들이 매번 다르게 마치 무작위 순서처럼 처리 되었다는 것을 알 수 있다.   
+
+만약 모든 파일들이 수정되었는지를 확인하고 싶다면 또 다른 문제가 발생한다. forEach 메서드는 반복자(iterator) 콜백 함수를 비동기로 호출하므로 차단이 일어나지 않는다. forEach를 사용한 뒤 `console.log('all done');` 를 추가 하더라도 애플리케이션이 모두 완료되었다는 것을 의미 하지는 않는다.   
+이 문제를 해결하려면, 각 로그 메세지에 증가되는 카운터를 추가한 다음 파일 배열의 길이와 비교하여 "all done" 메시지를 출력한다 : 
+```python
+//디렉터리에 접근하기 전
+ var counter = 0;
+ ...
+ 
+	 writeStream.write('changed ' + name + '\n', 'utf8', function(err){
+		 if (err) throw err;
+		 console.log('finished ' + name);
+		 counter++;
+		 if (counter >= files.length)
+			 console.log('all done');
+	 })
+```
+모든 파일이 업데이트되고 난 후에 "all done" 메시지가 표시되는 것을 알 수 있다.   
+
+만약 애플리케이션이 하위 디렉터리를 만나게 되었을 때 에러가 발생하는 것을 방지 하기 위해서는 **fs.stats** 메서드를 사용하여야 한다. fs.stats 메서드가 반환하는 개체에는 파일인지 아닌지를 비롯한 개체에 대한 정보가 담겨있다. 물론 fs.stats 메서드 역시 비동기 메서드이므로, 콜백 중첩이 더 필요하다.
+
+**예제 5-6** 각 디렉터리 개체가 파일인지 확인하기 위해 stats를 추가
+```python
+var fs = require('fs');
+
+var writeStream = fs.createWriteStream('./log.txt',
+{'flags' : 'a',
+'encoding' : 'utf8',
+'mode' : 0666});
+
+try {
+    //파일 목록을 가져옴
+    fs.readdir('./data/', function(err,files){
+        //각 파일에 대해
+        files.forEach(function(name){
+            //개체가 파일인지 확인
+            fs.stat('./data/' + name, function(err, stats){
+                if (err) throw err;
+
+                if (stats.isFile())
+                //내용 수정
+                fs.readFile('./data/' + name, 'utf8', function(err,data){
+                    if (err) throw err;
+                    var adjData = data.replace(/somecompany\.com/g, 'burningbird.net');
+
+                    //파일에 기록
+                    fs.writeFile('./data/' + name, adjData, function(err){
+                        if (err) throw err;
+                        //로그 기록
+                        writeStream.write('changed ' + name + '\n', 'utf8', function(err){
+                            if (err) throw err;
+                        })
+                    })
+                })
+            })
+        })
+    })
+} catch (err) {
+    console.log(err);
+}
+```
+예제 5-6에서는 원하는 목적의 애플리케이션이 구현은 되었지만, 가독성과 유지보수가 어려워졌다. 이러한 중첩 콜백의 형태는 **콜백 스파게티**나 **죽음의 피라미드**라고 불린다.   중첩 콜백이 계속 오른쪽으로 밀려가기 때문에 올바른 콜백에 코드를 제대로 작성하고 있는지를 보장하기가 점점 어렵게 된다. 일련의 메서드 호출을 중첩 콜백에 의존하지 않고 구현하기 위해, 비동기 제어 흐름을 제공하는 서드파이 모듈을 찾아볼 필요가 있다.   
+
+각 메서드에 대해 명명된 함수를 콜백 함수로 제공하는 방법으로 피라미드를 평평하게 만들 수 있고, 디버깅도 간단해지지만, 이 방법은 모든 프로세스가 완료된 시점을 결정하는 것과 같은 다른 문제들 중 일부를 해결하지 못하기 때문에, 서드 파티 라이브러리가 필요하다.
