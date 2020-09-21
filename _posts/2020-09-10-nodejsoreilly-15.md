@@ -332,4 +332,36 @@ try {
 **nextTick**   
 Node의 process.nextTick 을 기반으로 이벤트 루프의 다음번 루프에서 콜백을 호출한다.   
 
-제어 흐름 모듈들 전부가 가능한 모든 패턴들을 처리할 수 있는 기능을 제공하고 있는 건 아니지만, 가장 흔히 사용되는 패턴인 **series**(sequene나 waterfall 이라고 부르기도 함. Async 에서는 waterfall을 series와 구분하고 있음)와 **parallel**은 대부분의 모듈에서 제공한다.
+제어 흐름 모듈들 전부가 가능한 모든 패턴들을 처리할 수 있는 기능을 제공하고 있는 건 아니지만, 가장 흔히 사용되는 패턴인 **series**(sequene나 waterfall 이라고 부르기도 함. Async 에서는 waterfall을 series와 구분하고 있음)와 **parallel**은 대부분의 모듈에서 제공한다.   
+
+유지보수가 활발한 제어 흐름 모듈 중에서 가장 인기있는 것은 Step 과 Async 이다. 서로 비동기 제어 흐름에 대한 자신만의 고유한 관점을 나타내고 있으며, 둘 다 매우 유용하고 거의 필수적이라고 할 수 있는 서비스를 제공하고 있다.   
+
+**Step**   
+Step은 순차 및 병렬 실행의 흐름을 간단하게 제어할 수 있게 해주는 데 초점을 맞춘 유틸리티 모듈로, 다음과 같이 npm을 사용하여 설치할 수 있다 :   
+`npm install step`   
+Step 모듈은 단 한개의 개체만을 제공한다. 이 개체를 사용하여 순차적으로 실행하려면 비동기 함수 호출을 함수로 감싸서 개체에 매개변수로 전달한다. 
+
+**예제 5-7** Step 을 사용하여 순차적으로 비동기 작업들을 수행   
+```python
+var fs = require('fs'),
+  step = require('step');
+
+  try {
+    step(
+      function readData(){
+        fs.readFile('./data/data1.txt', 'utf8', this);
+      },
+      function modify(err,text){
+        if (err) throw err;
+        return text.replace(/somecompany\.com/g, 'burningbird.net');
+      },
+      function writeData(err, text){
+        if (err) throw err;
+        fs.writeFile('./data/data1.txt', text, this);
+      }
+    );
+  } catch (err) {
+    console.error(err);
+  } 
+```
+예제 5-7에서는 파일의 내용을 읽고, 내용을 수정한 후 다시 파일에 기록하기 위해 Step을 사용하고 있다.
