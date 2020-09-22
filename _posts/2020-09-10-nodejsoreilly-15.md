@@ -364,4 +364,50 @@ var fs = require('fs'),
     console.error(err);
   } 
 ```
-예제 5-7에서는 파일의 내용을 읽고, 내용을 수정한 후 다시 파일에 기록하기 위해 Step을 사용하고 있다.
+예제 5-7에서는 파일의 내용을 읽고, 내용을 수정한 후 다시 파일에 기록하기 위해 Step을 사용하고 있다.   
+Step 순서 상 첫 번째 함수인 **readData**는 파일의 내용을 문자열로 읽은 후 두 번째 함수로 전달한다. 두 번째 함수는 해당 문자열을 **replace**를 사용하여 수정하고, 결과를 세 번째 함수에 전달한다. 세 번째 함수에서는 수정한 문자열을 다시 원래 파일에 기록한다.   
+첫 번째 함수에서는 비동기**fs.readFile**을 감싸고 있다. 하지만 콜백 함수를 마지막 인수로 전달하는 대신, 코드에서는 this 컨텍스트로 전달하고 있다. 함수가 종료되면 함수의 데이터와 발생 가능한 에러는 다음 함수인 modify로 전송된다. **modify** 함수는 비동기 함수가 아니며, 문자열 중 부분문자열을 다른 것으로 바꾸는 역할만을 수행한다. 이 함수는 this 컨텍스트를 필요로 하지 않으며, 함수 끝에서 결과를 반환할 뿐이다.   
+마지막 함수는 새롭게 수정된 문자열을 받아서 원래 파일에 다시 기록한다. 이 함수는 비동기 함수이므로 콜백 함수 자리에 this를 받는다. 마지막 함수의 마지막 매개변수로 this를 넣지 않으면 발생한 오류가 throw 되지 않아 바깥쪽 루프에서 잡히지 않는다.   다음과 같이 수정한 코드에서는 boogabooga 하위 디렉터리가 존재하지 않는 경우,   
+```python
+function writeFile(err,text){
+	if (err) throw err;
+	fs.writeFile('./boogabooga/data/data1.txt);
+}
+```
+쓰기가 실패했다는 것을 절대 알 수 없게 된다.   
+
+두 번째 함수는 비동기가 아님에도 불구하고, Step 내에서 첫번째 함수를 제외한 모든 함수는 일관성을 위해 첫 번째 매개변수로 error 개체를 요구한다. 동기 함수에서는 이 매개변수가 기본적으로 null이다.
+**예제 5-8** 그룹화된 비동기 프로세스를 처리하기 위해 Step의 group() 기능을 사용
+```python
+var fs = require('fs'),
+  Step = require('step'),
+  files,
+  _dir = './data/';
+
+  try {
+      Step(
+        function readDir(){
+          fs.readdir(_dir, this);
+        },
+        function readFile(err, results){
+          if (err) throw err;
+
+          files = results;
+          var group = this.group();
+          results.forEach(function(name){
+            fs.readFile(_dir + name , 'utf8', group());
+          });
+        },
+        function writeAll(err,data){
+          if (err) throw err;
+          for(var i = 0; i < files.length; i++){
+            var adjdata = data[i].replace(/somecompany\.com/g, 'burningbird.net');
+            fs.writeFile(_dir + files[i], adjdata, 'utf8', this);
+          }
+        }
+      );
+  } catch (err) {
+    console.error(err);
+  } 
+```
+예제 5-8에서는 지정된 하위 디렉터리 내의 파일 목록을 가져오기 위해 **readdir** 비동기 함수를 추가했다. 파일들의 배열은 예제 5-6에서처럼 **forEach** 명령으로 처리되지만, readFile에 대한 호출이 콜백 함수나 this로 끝나지 않는다. Step에서는 group 개체를 생성하도록 호출하면 그룹 결과를 위한 매개변수를 준비해두라고 알리게 된다. readFile 비동기 함수 내에서 group 개체를 호출하면 각 콜백이 순서대로 호출되며, **결과가 배열로 그룹화되어 다음 함수로 전달**된다.
