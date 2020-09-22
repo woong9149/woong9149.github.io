@@ -410,4 +410,37 @@ var fs = require('fs'),
     console.error(err);
   } 
 ```
-예제 5-8에서는 지정된 하위 디렉터리 내의 파일 목록을 가져오기 위해 **readdir** 비동기 함수를 추가했다. 파일들의 배열은 예제 5-6에서처럼 **forEach** 명령으로 처리되지만, readFile에 대한 호출이 콜백 함수나 this로 끝나지 않는다. Step에서는 group 개체를 생성하도록 호출하면 그룹 결과를 위한 매개변수를 준비해두라고 알리게 된다. readFile 비동기 함수 내에서 group 개체를 호출하면 각 콜백이 순서대로 호출되며, **결과가 배열로 그룹화되어 다음 함수로 전달**된다.
+예제 5-8에서는 지정된 하위 디렉터리 내의 파일 목록을 가져오기 위해 **readdir** 비동기 함수를 추가했다. 파일들의 배열은 예제 5-6에서처럼 **forEach** 명령으로 처리되지만, readFile에 대한 호출이 콜백 함수나 this로 끝나지 않는다. Step에서는 group 개체를 생성하도록 호출하면 그룹 결과를 위한 매개변수를 준비해두라고 알리게 된다. readFile 비동기 함수 내에서 group 개체를 호출하면 각 콜백이 순서대로 호출되며, **결과가 배열로 그룹화되어 다음 함수로 전달**된다.   
+파일명들을 저장하기 위해 readdir의 결과는 전역변수 files에 할당된다. 마지막 Step 함수에서는 for 루프를 돌면서 데이터를 수정하고 files 변수에서 파일 명을 얻어낸다. 파일명과 수정한 데이터는 마지막으로 writeFile을 비동기로 호출하는 데 사용된다.   
+
+각 파일에 대한 변경사항을 하드코딩하고자 한다면, 다른 접근방법으로 Step의 parallel 기능을 사용할 수 있다.   
+**예제 5-9** Step의 group 기능을 사용하여 파일 그룹을 읽고 쓰기   
+```python
+var fs = require('fs'),
+  Step = require('step'),
+  files;
+
+try {
+  Step(
+    function readFiles(){
+      fs.readFile('./data/data1/txt', 'utf', this.parallel());
+      fs.readFile('./data/data2/txt', 'utf', this.parallel());
+      fs.readFile('./data/data3/txt', 'utf', this.parallel());
+    },
+    function writeFiles(err, data1, data2, data3){
+      if (err) throw err;
+      data1 = data1.replace(/somecompany\.com/g, 'burningbird.net');
+      data2 = data2.replace(/somecompany\.com/g, 'burningbird.net');
+      data3 = data3.replace(/somecompany\.com/g, 'burningbird.net');
+
+      fs.writeFile('./data/data1.txt',data1, 'utf8',this.parallel());
+      fs.writeFile('./data/data2.txt',data2, 'utf8',this.parallel());
+      fs.writeFile('./data/data3.txt',data3, 'utf8',this.parallel());
+    }
+  );
+} catch (err) {
+  console.log(err);
+} 
+```
+예제 5-9는 몇 개의 다른 파일들에 대해 readFile을 수행하고, 마지막 매개변수로**this.parallel()** 을 넘긴다. 이는 결과적으로 첫 번째 함수 내의 각 readFile에 대해 **next함수**로 전달되는 매개변수가 된다.**parallel 함수 호출은 두 번째 함수 내의 writeFile 함수에서도 각 콜백이 순서대로 처리되도록 보장하기 위해 사용된다**.
+예제 5-9의 애플리케이션은 동작은 되지만 보기에 좋지않다. 병렬 기능은 일련의 비동기 함수 여러개를 비동기로 실행하고 사후 콜백으로 처리되는 데이터용으로 사용하도록 남겨두는 것이 더 바람직하다.
