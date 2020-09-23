@@ -442,5 +442,51 @@ try {
   console.log(err);
 } 
 ```
-예제 5-9는 몇 개의 다른 파일들에 대해 readFile을 수행하고, 마지막 매개변수로**this.parallel()** 을 넘긴다. 이는 결과적으로 첫 번째 함수 내의 각 readFile에 대해 **next함수**로 전달되는 매개변수가 된다.**parallel 함수 호출은 두 번째 함수 내의 writeFile 함수에서도 각 콜백이 순서대로 처리되도록 보장하기 위해 사용된다**.
+예제 5-9는 몇 개의 다른 파일들에 대해 readFile을 수행하고, 마지막 매개변수로**this.parallel()** 을 넘긴다. 이는 결과적으로 첫 번째 함수 내의 각 readFile에 대해 **next함수**로 전달되는 매개변수가 된다.**parallel 함수 호출은 두 번째 함수 내의 writeFile 함수에서도 각 콜백이 순서대로 처리되도록 보장하기 위해 사용된다**.    
 예제 5-9의 애플리케이션은 동작은 되지만 보기에 좋지않다. 병렬 기능은 일련의 비동기 함수 여러개를 비동기로 실행하고 사후 콜백으로 처리되는 데이터용으로 사용하도록 남겨두는 것이 더 바람직하다.
+
+## Async(by Caolan McMahon)
+Async 모듈은 forEach, map, filter 등을 독자적으로 변형한 것처럼 컬렉션을 관리하는 기능을 제공한다. 또한 memoization을 비롯한 몇 가지 유틸리티 함수도 제공한다.   
+> Async와 Async.js 모듈 두 개가 존재하므로, 둘을 혼동하지 않도록 주의해야한다. 지금 다루는 것은  Caolan McMahon이 만든 Async 모듈이다.   
+
+다음과 같이 npm을 사용해서 Async를 설치한다 :   
+`npm install async`   
+Async는 serial, parallel, waterfall을 비롯한 다양한 비동기 패턴에 대한 제어 흐름 기능을 제공한다. Step 처럼 중첩 콜백 피라미드를 쉽게 다룰 수 있게 해주는 도구들을 제공하지만, 접근방법은 상당히 다르다. 예를 들면, **각 함수와 콜백 사이에 직접 삽입할 필요가 없다. 대신에 프로세스의 일부로 콜백을 포함시키게 된다.**   
+
+**예제 5-10** 파일의 내용을 비동기로 읽고, 수정하고, 쓰기 위해 async.waterfall을 사용   
+```python
+var fs = require('fs'),
+  async = require('async');
+
+  try {
+    async.waterfall([
+      function readData(callback){
+        fs.readFile('./data/data1.txt', 'utf8', function(err, data){
+          callback(err,data);
+        });
+      },
+      function modify(text, callback){
+          var adjdata = text.replace(/somecompany\.com/g, 'burningbird.net');
+          callback(null,adjdata);
+      },
+      function writeData(text, callback){
+        fs.write('./data/data1.txt', text, function(err){
+          callback(err,text);
+        });
+      }
+    ], function(err,result){
+      if (err) throw err;
+      console.log(result);
+    });
+  } catch (err) {
+    console.log(err);
+  } 
+```
+예제5-10에서는 fs.readFile을 사용하여 데이터 파일을 열고 읽어서 비동기 문자열 치환을 수행한 후, fs.writeFile을 사용하여 문자열을 다시 파일에 기록하는 데 **async.waterfall**을 사용했다.   
+
+**async.waterfall** 메서드는 두 개의 매개변수를 받는데, **작업들의 배열**과 **선택적인 콜백함수**다. 각 비동기 작업 함수는 async.waterfall 메서드 배열의 구성요소이며, 각 함수는 마지막 매개변수로 콜백을 필요로 한다. 이 콜백 함수는 물리적으로 함수를 중첩시킬 필요 없이 비동기 콜백 결과를 체인화할 수 있게 해준다. 하지만 각 함수의 콜백은 각 함수에서 에러를 테스트할 필요가 없다는 것을 제외하고는 중첩 콜백을 사용해서 일반적으로 처리하는 것과 동일하게 처리된다.   
+콜백은 첫 번째 매개변수로 error 개체를 찾아본다. 콜백 함수에 error 개체를 전달하면, 이 시점에 프로세스가 종료되고 최종 콜백 루틴이 호출된다. 최종 콜백에서는 에러를 테스트해보고 바깥쪽에 있는 예외 처리 블록에 에러를 throw 하게 된다.   
+
+readData 함수는 먼저 에러를 확인하는 fs.readFile 호출을 감싸고 있다. 에러가 발견되면 에러를 throw하고 프로세스를 종료한다. 에러가 발견되지 않으면 마지막 동작으로 콜백을 호출한다. 이는 Async로 하여금 다음 함수를 호출하고 관련된 데이터를 전달하라는 방아쇠다. 다음 함수는 비동기가 아니므로 처리를 수행한 후 null인 error 개체와  수정된 데이터를 전달한다. 마지막 함수인 writeData는 이전 콜백에서 전달된 데이터를 사용하여 자신의 콜백 루틴에서 에러를 테스트하는 비동기 writeFile을 호출한다.   
+
+> 예제5-10 에서는 명명된 함수를 사용하고 있지만, 공식 문서에서는 익명함수를 권장한다. 둘 다 동일하게 잘 수행되기는 하지만, 명명 함수를 사용하는 것이 디버깅과 에러 처리를 단순화시킬 수 있는 장점이 있다.
