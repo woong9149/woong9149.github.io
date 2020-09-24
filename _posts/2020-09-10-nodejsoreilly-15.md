@@ -490,3 +490,110 @@ var fs = require('fs'),
 readData 함수는 먼저 에러를 확인하는 fs.readFile 호출을 감싸고 있다. 에러가 발견되면 에러를 throw하고 프로세스를 종료한다. 에러가 발견되지 않으면 마지막 동작으로 콜백을 호출한다. 이는 Async로 하여금 다음 함수를 호출하고 관련된 데이터를 전달하라는 방아쇠다. 다음 함수는 비동기가 아니므로 처리를 수행한 후 null인 error 개체와  수정된 데이터를 전달한다. 마지막 함수인 writeData는 이전 콜백에서 전달된 데이터를 사용하여 자신의 콜백 루틴에서 에러를 테스트하는 비동기 writeFile을 호출한다.   
 
 > 예제5-10 에서는 명명된 함수를 사용하고 있지만, 공식 문서에서는 익명함수를 권장한다. 둘 다 동일하게 잘 수행되기는 하지만, 명명 함수를 사용하는 것이 디버깅과 에러 처리를 단순화시킬 수 있는 장점이 있다.
+
+**예제 5-11** 디렉터리에서 개체를 얻어 파일을 찾은 후 파일을 읽고 수정해서 다시 쓴 다음 로그를 기록
+```python
+var fs = require('fs'),
+  async = require('async'),
+  _dir = './data/';
+
+  var writeStream = fs.createWriteStream('./log.txt',
+  {'flags':'a',
+    'encoding' :'utf8',
+    'mode' : 0666});
+
+    try {
+      async.waterfall([
+        function readDir(callback){
+          fs.readdir(_dir, function(err,files){
+            callback(err,files);
+          })
+        },
+        function loopFiles(files, callback){
+          files.forEach(function(name){
+            callback(null,name);
+          });
+        },
+        function checkFile(file, callback){
+          fs.stat(_dir + file, function(err, stats){
+            callback(err, stats,file);
+          })
+        },
+        function readData(stats, file, callback){
+          if (stats.isFile())
+            fs.readFile(_dir + file, 'utf8', function(err, data){
+              callback(err,file,data);
+            })
+        },
+        function modify(file, text, callback){
+          var adjdata = text.replace(/somecompany\.com/g, 'burningbird.net');
+          callback(null, file, adjdata);
+        },
+        function writeData(file, text, callback){
+          fs.writeFile(_dir + file, text, function(err){
+            callback(err,file);
+          })
+        },
+        function logChange(file, callback){
+          writeStream.write('changed ' + file + '\n', 'utf8', function(err){
+            callback(err,file);
+          });
+        }
+      ], function(err,result){
+          if (err) throw err;
+          console.log('modified ' + result);
+      });
+    } catch (err) {
+      console.log(err);
+    } 
+```
+**fs.readdir** 메서드는 디렉터리 개체의 배열을 얻는데 사용된다. Node의 **forEach** 메서드(Async의 forEach가 아님)가 각 개체에 접근하는 데 사용된다. **fs.stats** 메서드는 각 개체의 stats를 얻어내는 데 사용된다. **stats**는 파일인지 검사하는 데 사용되며, 파일이 발견되면 파일을 열고 데이터에 접근한다. 데이터를 수정한 후 **fs.writeFile**을 통해 파일에 다시 기록한다. 해당 동작은 로그 파일에 기록디며, 콘솔로 되풀이 된다.   
+
+일부 콜백에는 더 많은 데이터가 전달되는 것에 유의한다. 대부분의 함수들은 텍스트뿐만 아니라 파일 이름이 필요하므로, 마지막 여러 개의 메서드들은 이를 전달받는다. **각 함수의 첫 번째 매개변수가 error 객체(error 개체가 없을 경우 null)이고 마지막 매개변수가 콜백 함수인 한, 데이터 양에 관계없이 메서드에 전달 가능하다.**   
+
+Async가 각 콜백 내에서 error 개체를 테스트하고, 에러가 발견되면 처리를 중단하고 최종 콜백 함수를 호출하므로 각 비동기 작업 함수에서는 에러를 확인할 필요가 없다. 이전에 Step을 사용할 때처럼 배열 항목을 처리하기 위해 특별한 처리를 해야 할 필요도 없다.
+
+**예제 5-12** 세 개의 파일을 병렬로 열고, 내용을 읽음
+
+```python
+var fs = require('fs'),
+  async = require('async');
+
+  try {
+    async.parallel({
+        data1 : function (callback){
+          fs.readFile('./data/data1.txt', 'utf8', function(err,data){
+            callback(err,data);
+          });
+        },
+        data2 : function (callback){
+          fs.readFile('./data/data2.txt', 'utf8', function(err,data){
+            callback(err,data);
+          });
+        },
+        data3 : function readData(callback){
+          fs.readFile('./data/data3.txt', 'utf8', function(err,data){
+            callback(err,data);
+          });
+        }, function(err,result){
+          if (err) throw err;
+          console.log(result);
+        }
+    })
+  } catch (err) {
+    console.log(err);
+  } 
+```
+예제 5-12 는 **async.parallel**을 사용하여 세 파일의 내용을 병렬로 읽는다. 하지만 이 예제는 함수 배열 대신에 Async가 지원하는 다른 접근방법을 사용하고 있는데, 개체의 속성으로 나열된 각 비동기 작업 개체로 개체를 전달한다. 세 작업이 모두 완료되면 결과가 콘솔에 출력된다.   
+
+결과는 개체의 배열로 반환되며, 각 결과는 각각의 속성에 연결되어 있다. 예제에서 세 개의 데이터 파일이 다음과 같은 내용을 가지고 있을 경우,
+
+```
+data1.txt : apples
+data2.txt : oranges
+data3.txt : peaches
+```
+예제 5-12를 실행한 결과는 다음과 같다 :   
+`{data1 : 'apples\n', data2 : 'oranges\n', data3 : 'peaches\n'}`   
+
+Async 제어 흐름 메서드를 사용해서 작업할 때는 각 비동기 작업에 콜백을 전달하고, 작업이 완료되면 error 개체(또는 null)와 필요한 데이터를 전달하여 이 콜백을 호출하기만 하면 된다는 것을 기억해야 한다.
