@@ -44,3 +44,76 @@ http.createServer(function (req,res){
 
 console.log('Server running at 8124/');
 ```
+
+애플리케이션은 파일을 읽기 위해 열고 HTTP 응답에 쓰는 것을 시도하기 전에 파일이 존재하는지를 먼저 확인해야 한다. **path.exists** 함수가 이 시점에서 올바른 선택이 된다. 파일이 존재하지 않으면, 그 결과에 대해 간략한 메시지를 쓰고 상태 코드를 `404 : document not found`로 설정한다 :   
+
+```python
+path.exists(pathname, function(exists){
+	if (exists) {
+		//요청 처리를 위한 코드를 삽입
+	} else {
+		res.writeHead(404);
+		res.write('Bad request 404\n');
+		res.end();
+}
+```
+이전 예제에서는 파일 내용을 읽기 위해 fs.readFile을 사용 했다. 하지만 fs.readFile의 문제는 파일을 사용하기 위해 파일 전체를 메모리로 읽어야 한다는 것이다.   
+웹 상에서 제공되는 문서는 상당히 크기가 클 수 있다. 뿐만 아니라, 특정 시점에 해당 문서에 대해 수많은 요청이 발생할 수 있다 fs.readFile로는 확장성에 대응하기 어렵다.   
+> path.exists 메서드는  Node 0.8에서 사용이 금지되었으므로, 그 대신에 fs.exists를 사용하여야 한다.   
+
+> [Node공식문서](https://nodejs.org/api/fs.html#fs_fs_exists_path_callback/)에 따르면 fs.exists도 금지되었기 때문에, fs.stat()나 fs.access()를 사용 해야 한다.
+
+fs.readFile을 사용하는 대신, 애플리케이션은**fs.createReadStream** 메서드를 기본 설정으로 사용하여 읽기 스트림을 생성한다. 그 다음에는 파일 내용을 HTTP 응답 개체에 그대로 **pipe**시킬뿐이다. 스트림이 종료될 때 종료 신호를 전송하므로, 읽기 스트림에 대해 end 메서드 호출을 사용하지 않아도 된다 :   
+```python
+res.setHeader('Content-Type' , 'text/html');
+
+//200 상태 - 발견됨, 오류 없음
+res.statusCode = 200;
+
+//읽기 가능 스트림을 생성하고 pipe시킴
+var file = fs.createReadStream(pathname);
+file.on("open", function(){
+	file.pipe(res);
+});
+file.on("error", function(err){
+	console.log(err);
+});
+```
+읽기 스트림은 open과 error 라는 두 개의 흥미로운 이벤트를 가지고 있다. open 이벤트는 스트림이 준비되었을 때 전송되며, error 이벤트는 문제가 발생한 경우에 전송된다. 애플리케이션은 open 이벤트의 콜백 함수 내에서 pipe 메서드를 호출한다.
+
+**예제 6-1** 간단한 정적 파일 웹 서버   
+```python
+var http = require('http'),
+  fs = require('fs'),
+  path - require('path'),
+  base = '/home/examples/public_html';//windows에서는 절대경로를 지정하거나 .을 사용하여 실행중인 루트 디렉터리 하위의 상태경로를 지정해야 한다.
+
+  http.createServer(function(req,res){
+    pathname = base + req.url;
+    console.log(pathname);
+
+    path.exists(pathname, function(exists){
+      if(!exists){
+        res.writehead(404);
+        res.write('Bad request 404\n');
+        res.end();
+      } else{
+        res.setHeader('Content-Type', 'text/html');
+
+        //200상태 - 발견됨, 오류 없음
+        res.statusCode = 200;
+
+        //읽기 가능 스트림을 생성하고 pipe 시킴
+        var file = fs.createWriteStream(pathname);
+        file.on("open",function(){
+          file.pipe(res);
+        });
+        file.on("error",function(err){
+          console.log(err);
+        });
+      }
+    });
+  }).listen(8124);
+
+  console.log("Server running at 8124/");
+```
