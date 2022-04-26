@@ -18,4 +18,19 @@ Aggregate는 독립된 객체 군이기 때문에 한 Aggregate에 속한 객체
 **Aggregate Root**   
 Aggregate는 여러 객체로 구성되기 때문에 한 객체만 상태가 정상이어서는 안 된다. 도메인 규칙을 지키려면 Aggregate에 속한 모든 객체가 정상 상태를 가져야 한다.   
 Aggregate에 속한 모든 객체가 일관된 상태를 유지하려면 Aggregate 전체를 관리할 주체가 필요한데 이 책임을 지는 것이 바로 Aggregate의 Root Entity다. Aggregate Root Entity는 Aggregate의 대표 Entity로 Aggregate에 속한 객체는 Aggregate Root Entity에 직접 또는 간접적으로 속한다.   
-*(예를들어, 구매할 상품의 개수를 변경하면수량과 총 금액이 모두 변경되어야한다. 그렇지 않으면, '주문 총 금액은 개별 상품의 주문 개수 X 가격 의 합이다s.' 라는 도메인 규칙을 어기고 데이터 일관성이 깨진다.) *
+*(예를들어, 구매할 상품의 개수를 변경하면수량과 총 금액이 모두 변경되어야한다. 그렇지 않으면, '주문 총 금액은 개별 상품의 주문 개수 X 가격 의 합이다.' 라는 도메인 규칙을 어기고 데이터 일관성이 깨진다.)* 
+
+예를들어,  주문 Aggregate 에서 루트 역할을 하는 엔티티는 Order이다. OrderLine, ShippingInfo, Orderer 등 주문 Aggregate에 속한 모델은 Order에 직접 또는 간접적으로 속한다.   
+
+**도메인 규칙과 일관성**   
+Aggregate Root의 핵심 역할은 Aggregate의 일관성이 깨지지 않도록 하는 것이다. 이를 위해 Aggregate Root는 Aggregate가 제공해야 할 도메인 기능을 구현한다.    
+예를 들어, Order Aggregate는 배송지 변경, 상품 변경과 같은 기능을 제공하는데    
+Aggregate Root인 Order가 이 기능을 구현한 메서드를 제공한다. Aggregate Root가 제공하는 메서드는 도메인 규칙에 따라 Aggregate에 속한 객체의 일관성이 깨지지 않도록 구현해야 한다.   
+예를 들어, 배송이 시작되기 전까지만 배송지 정보를 변경할 수 있다는 규칙이 있다면,    
+Aggregate Root인 Order의 changeShippingInfo() 메서드는 이 규칙에 따라 배송 시작 여부를 확인하고 변경이 가능한 경우에만 배송지 정보를 변경해야 한다.   Aggregate Root가 아닌 다른 객체가 Aggregate에 속한 객체를 직접 변경하면 안된다. 이는 Aggregate Root가 강제하는 규칙을 적용할 수 없어 모델의 일관성을 깨는 원인이 된다.    
+불필요한 중복을 피하고 Aggregate Root를 통해서만 도메인 로직을 구현하게 만들려면 도메인 모델에 대해 다음의 두가지를 습관적으로 적용해야 한다.
+* 단순히 필드를 변경하는 set 메서드를 public 으로 만들지 않는다.
+* Value 타입은 불변으로 구현한다.   
+
+public한 set 메서드는 중요 도메인의 의미나 의도를 표현하지 못하고 도메인 로직이 도메인 객체가 아닌 응용 영역이나 표현 영역으로 분산되게 만드는 원인이 된다. 도메인 로직이 한곳에 응집되어 있지 않게 되므로, 코드를 유지보수할 때에도 분석하고  수정하는 데 더 많은 시간을 들이게 된다.    
+또한, Value 타입은 불변으로 구현한다. Value 객체의 값을 변경할 수 없으면 Aggregate Root에서 Value 객체를 구해도 값을 변경할 수 없기 때문에 Aggregate 외부에서 Value 객체의 상태를 변경할 수 없게 된다. Value 객체가 불변이면 Value 객체의 값을 변경하는 방법은 새로운 Value 객체를 할당하는 것 뿐이다. Value 타입의 내부 상태를 변경하려면 Aggregate Root를 통해서만 가능하다. 그러므로, Aggregate Root가 도메인 규칙을 올바르게만 구현하면 Aggregate 전체의 일관성을 올바르게 유지할 수 있다.
