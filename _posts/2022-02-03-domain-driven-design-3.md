@@ -34,3 +34,10 @@ Aggregate Root인 Order의 changeShippingInfo() 메서드는 이 규칙에 따�
 
 public한 set 메서드는 중요 도메인의 의미나 의도를 표현하지 못하고 도메인 로직이 도메인 객체가 아닌 응용 영역이나 표현 영역으로 분산되게 만드는 원인이 된다. 도메인 로직이 한곳에 응집되어 있지 않게 되므로, 코드를 유지보수할 때에도 분석하고  수정하는 데 더 많은 시간을 들이게 된다.    
 또한, Value 타입은 불변으로 구현한다. Value 객체의 값을 변경할 수 없으면 Aggregate Root에서 Value 객체를 구해도 값을 변경할 수 없기 때문에 Aggregate 외부에서 Value 객체의 상태를 변경할 수 없게 된다. Value 객체가 불변이면 Value 객체의 값을 변경하는 방법은 새로운 Value 객체를 할당하는 것 뿐이다. Value 타입의 내부 상태를 변경하려면 Aggregate Root를 통해서만 가능하다. 그러므로, Aggregate Root가 도메인 규칙을 올바르게만 구현하면 Aggregate 전체의 일관성을 올바르게 유지할 수 있다.
+
+# Repository와 Aggregate
+aggregate는 개념상 한 개의 도메인 모델을 표현하므로 객체의 영속성을 처리하는 repository는 aggregate 단위로 존재한다.  새로운 aggregate를 만들면 저장소에 aggregate를 영속화하고, aggregate를 사용하려면 저장소에서 aggregate를 읽어야 하므로 repository는 적어도 save(aggregate 저장), findById(id로 aggregate를 구함) 두 메서드를 제공해야 한다. 이 두 메서드 외에 필요에 따라 다양한 조건으로 aggregate를 검색하는 메서드나 aggregate를 삭제하는 메서드를 추가할 수 있다.   
+어떤 기술을 이용해서 repository를 구현하느냐에 따라 aggregate의 구현도 영향을 받는다. 예를들어, ORM 기술 중의 하나인 JPA/Hibernate를 사용하면 데이터베이스 관계형 모델에 객체 도메인 모델을 맞춰야 하는 경우도 있다. 하지만 aggregate를 영속화 할 저장소로 무엇을 사용하든지 간에 aggregate의 상태가 변경되면 모든 변경을 원자적으로 저장소에 반영해야 한다.    
+aggregate에서 두 개의 객체를 변경했는데, 저장소에는 한 객체에 대한 변경만 반영되면 데이터 일관성이 깨지므로 문제가 된다.
+aggregate는 개념적으로 하나이므로 repository는 aggregate 전체를 저장소에 영속화해야 한다. 예를 들어, Order aggregate와 관련된 테이블이 세 개라면 repository를 통해서 Order aggregate를 저장할 때 aggregate root와 매핑되는 테이블 뿐만 아니라 aggregate에 속한 모든 구성요소를 위한 테이블에 데이터를 저장해야 한다.
+동일하게 aggregate를 구하는 repository 메서드는 완전한 aggregate를 제공해야 한다. repository가 완전한 aggregate를 제공하지 않으면, 필드나 값이 올바르지 않아 aggregate의 기능을 실행하는 도중에 NullPointException과 같은 문제가 발생하게 된다.
