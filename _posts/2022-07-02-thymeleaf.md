@@ -1,5 +1,15 @@
 ---
 title: "[Thymeleaf] 타임리프 기본 문법"
+categories:
+- TIL
+- Thymeleaf
+- 타임리프
+- 템플릿엔진
+tags:
+- TIL
+- Thymeleaf
+- 타임리프
+- 템플릿엔진
 ---
 
 # 타임리프란 ?
@@ -10,11 +20,13 @@ Spring boot에서 공식적으로 지원하는 뷰 템플릿이며,
 
 하는 것이 대표적인 특징이다.
 
+<br/>
 > **템플릿 엔진(Template Engine)이란?**    
 > 템플릿 양식과 특정 데이터 모델에 따른 입력 자료를 합성하여 결과 문서를 출력하는 소프트웨어 또는 소프트웨어 컴포넌트를 말한다.   
 > 템플릿 엔진은 view code(html)와 data logic code를 분리해주는 기능을 하며,  
 > 서버사이드 템플릿 엔진 vs 클라이언트 사이드 템플릿 엔진, 레이아웃 템플릿 엔진 vs  텍스트 템플릿 엔진 등으로 구분할 수 있다.
 
+<br/>
 **타임리프 사용**   
 	Spring boot(Gradle) - build.gradle
 
@@ -29,7 +41,8 @@ implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 <html xmlns:th="http://www.thymeleaf.org">
 ```   
 
-**속성 변경 - th:href**   
+<br/>
+**속성 변경1 - th:href**   
 ```java
 th:href="@{/css/bootstrap.min.css}"
 ```  
@@ -38,7 +51,55 @@ th:href="@{/css/bootstrap.min.css}"
 - HTML을 그대로 볼 때는 `href` 속성이 사용되고, 뷰 템플릿을 거치면 `th:href` 의 값이 `href` 로 대체되면서 동적으로 변경할 수 있다.
 - 대부분의 HTML 속성을 `th:xxx` 로 변경할 수 있다.
 
+<br/>
 **타임리프 핵심**   
 - 핵심은 `th:xxx` 가 붙은 부분은 서버사이트에서 랜더링 되고, 기존 것을 대체한다. `th:xxx`이 없으면 기존 html의 `xxx `속성이 그대로 사용 된다.
 - HTML을 파일로 직접 열었을 때, `th:xxx` 가 있어도 웹 브라우저는 `th:` 속성을 알지 못하므로 무시한다.
 - 따라서 HTML을 파일 보기를 유지하면서 템플릿 기능도 할 수 있다.
+
+<br/>
+**URL 링크 표현식 - @{...}**   
+```javascript
+th:href="@{/css/bootstrap.min.css}"
+```
+- **@{...}**: 타임리프는 URL 링크를 사용하는 경우 @{...}를 사용한다. 이것을 URL 링크 표현식이라 한다.
+- URL 링크 표현식을 사용하면 서블릿 컨텍스트를 자동으로 포함한다.
+
+<br/>
+**속성변경2- th:onclick**   
+- html의 `onclick="location.href='addForm.html'"`가 `th:onclick="|location.href='@{/basic/items/add}'|"`로 대체
+
+<br/>
+**리터럴 대체 - |...|**   
+- 타임리프에서 문자와 표현식은 분리되어 있기때문에 더해서 사용해야 한다.
+	- ```javascript
+		<span th:text="'Welcome to our application, ' + ${user.name} + '!'">
+		```
+-  다음과 같이 리터럴 대체 문법을 사용하면, 더하기 없이 편리하게 사용할 수 있다.
+	-  ```javascript
+		<span th:text="|Welcome to our application, ${user.name}!|">
+		```
+
+<br/>
+**반복 출력 - th:each**   
+- ```javascript
+	<tr th:each="item: ${items}">
+	```
+- 반복은 `th:each` 를 사용한다. 이렇게 하면 모델에 포함된 items 컬렉션 데이터가 item 변수에 하나씩 포함되고, 반복문 안에서 item 변수를 사용할 수 있다.
+- 컬렉션의 수 만큼 `<tr>..</tr>`이 하위 테그를 포함해서 생성된다.
+
+<br/>
+**변수 표현식 - ${...}**   
+- ```javascript
+	<td th:text="${item.price}">10000</td>
+	```
+- 모델에 포함된 값이나, 타임리프 변수로 선언한 값을 조회할 수 있다.
+- 프로퍼티 접근법을 사용 한다.(`item.price()`)
+
+<br/>
+**내용 변경 - th:text**   
+- ```javascript
+	<td th:text="${item.price}">10000</td>
+	```
+- 내용의 값을 `th:text`의 값으로 변경한다.
+- 여기서는 10000을 `${item.price}` 의 값으로 변경한다.
