@@ -103,3 +103,35 @@ th:href="@{/css/bootstrap.min.css}"
 	```
 - 내용의 값을 `th:text`의 값으로 변경한다.
 - 여기서는 10000을 `${item.price}` 의 값으로 변경한다.
+
+<br/>
+**URL 링크 표현식2 - @{...}**   
+- ```javascript
+	th:href="@{/basic/items/{itemId}(itemId=${item.id})}"
+	```
+- URL 링크 표현식을 사용하면 경로를 템플릿처럼 편리하게 사용할 수 있다.
+- 경로 변수 (`{itemId}`) 뿐만 아니라 쿼리 파라미터도 생성한다.
+- 예) 
+	-  ```javascript
+	th:href="@{/basic/items/{itemId}(itemId=${item.id}, query='test')}"
+	```
+	- 생성 링크:` http://localhost:8080/basic/items1?query=test`
+
+<br/>
+**URL 링크 간단히**   
+- ```javascript
+	th:href="@{|/basic/items/{itemId}|}"
+	```
+- 리터럴 대체 문법을 활용해서 간단히 사용할 수도 있다.
+
+<br/>
+**조건문 - th:if, th:unless**   
+- th:if는 if 문과 동일하고, th:unless는 else문과 같다.
+- th:unless는 일반적인 언어의 else문과 다르게 th:if에 들어가는 조건과 동일한 조건을 지정해야 한다.
+
+<br/>
+> **참고**   
+> 타임리프는 순수 HTML 파일을 웹 브라우저에서 열어도 내용을 확인할 수 있고, 서버를 통해 뷰 템플릿을 거치면 동적으로 변경된 결과도 확인할 수 있다.   
+> JSP를 생각해보면, JSP 파일은 웹 브라우저에서 그냥 열면 JSP 소스코드와 HTML이 뒤죽박죽 되어서 정상적인 확인이 불가능 하다. 오직 서버를 통해서 
+> JSP를 열어야 한다.   
+> 이렇게 순수 HTML을 그대로 유지하면서 뷰 템플릿도 사용할 수 있는 타임리프의 특징을**네츄럴 템플릿**(natural templates)이라 한다.
