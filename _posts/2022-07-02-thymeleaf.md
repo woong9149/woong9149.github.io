@@ -34,7 +34,7 @@ Spring boot에서 공식적으로 지원하는 뷰 템플릿이며,
 implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 ```
 
-
+<br/>
 # 타임리프 문법   
 **타임리프 사용 선언**
 ```java
@@ -103,6 +103,26 @@ th:href="@{/css/bootstrap.min.css}"
 	```
 - 내용의 값을 `th:text`의 값으로 변경한다.
 - 여기서는 10000을 `${item.price}` 의 값으로 변경한다.
+
+<br/>
+**속성 변경 - th:action**   
+- HTML form에서 `action` 값이 없으면 현재 URL에 데이터를 전송한다.
+- 그래서 조회와 입력 URL을 똑같이 맞추고, HTTP 메서드로 두 기능을 구분하는 것이 편리하다.
+	- 상품 등록 폼: GET `/basic/items/add`
+	- 상품 등록 처리: POST `/basic/items/add`
+- 이렇게 하면 하나의 URL로 등록 폼과 등록 처리를 깔끔하게 처리할 수 있다.
+
+<br/>
+**속성 변경 - th:object="${}"**  
+- HTML form을 submit 할 때 데이터가 `th:object` 속성을 통해 object에 지정한 객체에 값을 담아 덤긴다.
+- `th:field` 속성이 지정된 엘리먼트의 값을 넘긴다.
+
+<br/>
+**속성 변경 - th:field="\*{}"**  
+- `th:object` 속성과 함께 `th:field`를 이용해서 HTML 태그에 멤버 변수를 매핑할 수 있다.
+- `th:field`를 이용한 사용자 입력 필드는 id, name, value 속성 값이 자동으로 매핑된다.
+- `th:object`와 `th:field`는 Controller에서 특정 클래스의 객체를 전달 받은 경우에만 사용 가능하다.
+
 
 <br/>
 **URL 링크 표현식2 - @{...}**   
