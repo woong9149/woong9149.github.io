@@ -295,5 +295,5 @@ defaults:
       related: true
       
 # url
-category_dir: category/
-tag_dir: tag/
+category_dir: categories/
+tag_dir: tagg/

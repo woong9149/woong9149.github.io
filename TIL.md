@@ -1,7 +1,7 @@
 ---
 title: TIL
-layout: home
-permalink: "/TIL/"
+layout: posts
+permalink: "/TIL"
 author_profile: true
 ---
 

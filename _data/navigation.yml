@@ -3,9 +3,9 @@ main:
   - title: "Quick-Start Guide"
     url: https://mmistakes.github.io/minimal-mistakes/docs/quick-start-guide/
   - title: "TIL"
-    url: https://woong9149.github.io/TIL
-#   - title: "Data Structure"
-#     url: https://woong9149.github.io/DataStructure
+    url: https://woong9149.github.io/category/TIL
+  - title: "CATEGORY"
+    url: "/categories"
 #   - title: "Algorithm"
 #     url: https://woong9149.github.io/Algorithm
 #   - title: "기타"
