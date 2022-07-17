@@ -1,5 +1,8 @@
 ---
 title: "[Nodejs]생활코딩"
+layout: posts
+permalink: "/nodejs"
+author_profile: true
 ---
 
 # App - 글생성 UI 만들기
