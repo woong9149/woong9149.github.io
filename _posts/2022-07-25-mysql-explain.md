@@ -32,3 +32,16 @@ SELECT * FROM table;
 
 **Explain 결과**   
 Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	table,	partitions,	type,	possible_keys,	key,	key_len,	ref,	rows,	filtered,	Extra 등이 있다.
+
+**id** - 실행 계획에 있는 쿼리 안의 각 SELECT 문에 대한 식별자이다. SELECT 문의 실행 순서를 의미하며, 단순히 JOIN만 실행할 때는 항상 1이지만 Sub Query나 UNION이 있을 때는 다른 식별자로 구분되어 표시된다.   
+**select_type** - SELECT 유형   
+**table** - 출력 행에 대한 테이블   
+**partitions** - 일치하는 파티션   
+**type** - 조인 유형   
+**possible_keys** - 선택할 수 있는 인덱스   
+**key** - 실제로 선택한 인덱스   
+**key_len** - 선택한 키의 길이   
+**ref** - 인덱스와 비교한 열   
+**rows** - 검사할 행의 추정치   
+**filtered** - 테이블 조건으로 필터링된 행의 비율   
+**Extra** -  추가 정보
