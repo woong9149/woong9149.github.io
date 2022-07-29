@@ -34,7 +34,15 @@ SELECT * FROM table;
 Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	table,	partitions,	type,	possible_keys,	key,	key_len,	ref,	rows,	filtered,	Extra 등이 있다.
 
 **id** - 실행 계획에 있는 쿼리 안의 각 SELECT 문에 대한 식별자이다. SELECT 문의 실행 순서를 의미하며, 단순히 JOIN만 실행할 때는 항상 1이지만 Sub Query나 UNION이 있을 때는 다른 식별자로 구분되어 표시된다.   
-**select_type** - SELECT 유형   
+**select_type** - SELECT문의 타입을 나타낸다.
+- SIMPLE : 단순 SELECT문을 의미한다. UNION 또는 Sub Query를 사용하지 않은 경우를 의미하는 타입이다.
+- PRIMARY: 가장 바깥쪽의 SELECT문을 의미한다.
+- DERIVED: FROM 절 안에 있는 Sub Query를 의미하는 타입이다.
+- SUBQUERY: SELECT문 하위의 첫번째 Sub Query 즉, 가장 바깥에 있는 Sub Query문을 의미하는 타입이다.
+- DEPENDENT SUBQUERY
+- UNCACHEABLE SUBQUERY
+- UNION
+- DEPENDENT UNION
 **table** - 출력 행에 대한 테이블   
 **partitions** - 일치하는 파티션   
 **type** - 조인 유형   
