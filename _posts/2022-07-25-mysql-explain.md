@@ -4,6 +4,10 @@ categories:
 - TIL
 - MySQL
 - Explain
+tags:
+- TIL
+- MySQL
+- Explain
 ---
 
 # Explain
@@ -52,16 +56,16 @@ Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	
 **type** - 실행 계획에 있는 쿼리의 테이블들을 MYSQL이 어떤 식으로 조인되어 있는지를 나타낸다. 쿼리 튜닝을 하는데 있어서 중요한 지표가 되며 아래 유형들에서 system이 가장 좋은 유형, all로 갈 수록 가장 나쁜 유형이다.   
 - system: 테이블의 row가 1개 밖에 없는 경우(=시스템 테이블)의 특별한 접근 방식   
 - const: 쿼리 실행시 테이블에 조건을 만족하는 row가 최대 1개인 경우로, 결과 row가 하나만 있기 때문에 결과 컬럼은 상수 취급된다.
-- eq_ref
-- ref
-- fulltext
-- ref_or_null
+- eq_ref: primary key나 unique not null column으로 생성된 인덱스를 사용해 조인을 하는 경우로, 결과 row별로 조인되는 row가 하나만 있기 때문에 매우 빠르다.(ststem, const 유형 다음으로 빠름)   
+- ref: eq_ref 유형과는 다르게 인덱스로 사용된 키가 primary key나 unique not null column가 아닌 경우이다. 그렇기때문에 접근가능한 row가 여러개일 수 있다.   
+- fulltext: fulltext 인덱스를 사용하여 JOIN된 유형이다.   
+- ref_or_null: ref와 JOIN 유형이 비슷하지만, MySQL이 NULL을 포함하는 row에 대한 추가 검색을 수행한다는 점이 차이인 유형이다.   
 - index_merge
 - unique_subquery
 - index_subquery
 - range
 - index
-- all   
+- all: JOIN시 테이블의 모든 row를 스캔하는 유형이다. **모든 row를 스캔하기 때문에 가장 나쁜 유형**이며, 테이블의 상수 값 또는 컬럼 값을 기반으로 테이블에서 row 검색을 가능하게 하는 **인덱스를 추가하여 방지**할 수 있다.     
 
 **possible_keys** - 선택할 수 있는 인덱스   
 **key** - 실제로 선택한 인덱스   
