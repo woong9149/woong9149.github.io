@@ -60,10 +60,10 @@ Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	
 - ref: eq_ref 유형과는 다르게 인덱스로 사용된 키가 primary key나 unique not null column가 아닌 경우이다. 그렇기때문에 접근가능한 row가 여러개일 수 있다.   
 - fulltext: fulltext 인덱스를 사용하여 JOIN된 유형이다.   
 - ref_or_null: ref와 JOIN 유형이 비슷하지만, MySQL이 NULL을 포함하는 row에 대한 추가 검색을 수행한다는 점이 차이인 유형이다.   
-- index_merge
-- unique_subquery
-- index_subquery
-- range
+- index_merge: 인덱스 병합 최적화가 사용된 유형이다. 2개 이상의 인덱스를 사용하여 각각의 검색 결과를 만들어낸 후에 그 결과를 병합하는 방식이다.
+- unique_subquery: where절 내의 IN 구문에 Sub Query가 사용되는 유형이다. IN 구문의 Sub Query는 Unique한 결과를 반환하기 때문에 불필요한 오버헤드를 줄여 빠르다. 
+- index_subquery: unique_subquery와 비슷한 유형이지만, Sub Query에서 고유하지않은 인덱스를 사용하는 유형이다. 
+- range: 인덱스를 사용하여 rows의 범위를 특정하는 유형이다. range=, <>, >, >=, <, <=, IS NULL, <=>, BETWEEN, LIKE또는 IN()연산자 등이 쓰인 경우에 해당된다.   
 - index
 - all: JOIN시 테이블의 모든 row를 스캔하는 유형이다. **모든 row를 스캔하기 때문에 가장 나쁜 유형**이며, 테이블의 상수 값 또는 컬럼 값을 기반으로 테이블에서 row 검색을 가능하게 하는 **인덱스를 추가하여 방지**할 수 있다.     
 
