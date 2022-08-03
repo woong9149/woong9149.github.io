@@ -4,10 +4,14 @@ categories:
 - TIL
 - MySQL
 - Explain
+- DB
+- QUERY
 tags:
 - TIL
 - MySQL
 - Explain
+- DB
+- QUERY
 ---
 
 # Explain
@@ -64,7 +68,7 @@ Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	
 - unique_subquery: where절 내의 IN 구문에 Sub Query가 사용되는 유형이다. IN 구문의 Sub Query는 Unique한 결과를 반환하기 때문에 불필요한 오버헤드를 줄여 빠르다. 
 - index_subquery: unique_subquery와 비슷한 유형이지만, Sub Query에서 고유하지않은 인덱스를 사용하는 유형이다. 
 - range: 인덱스를 사용하여 rows의 범위를 특정하는 유형이다. range=, <>, >, >=, <, <=, IS NULL, <=>, BETWEEN, LIKE또는 IN()연산자 등이 쓰인 경우에 해당된다.   
-- index
+- index: 인덱스 트리가 스캔된다는 점을 제외하고는 all과 거의 동일하지만, 일반적으로 인덱스의 크기가 테이블 row의 크기보다는 작기 때문에 all보다는 조금 빠르긴하다.
 - all: JOIN시 테이블의 모든 row를 스캔하는 유형이다. **모든 row를 스캔하기 때문에 가장 나쁜 유형**이며, 테이블의 상수 값 또는 컬럼 값을 기반으로 테이블에서 row 검색을 가능하게 하는 **인덱스를 추가하여 방지**할 수 있다.     
 
 **possible_keys** - 선택할 수 있는 인덱스   
