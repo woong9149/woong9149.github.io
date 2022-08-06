@@ -60,7 +60,7 @@ Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	
 **type** - 실행 계획에 있는 쿼리의 테이블들을 MYSQL이 어떤 식으로 조인되어 있는지를 나타낸다. 쿼리 튜닝을 하는데 있어서 중요한 지표가 되며 아래 유형들에서 system이 가장 좋은 유형, all로 갈 수록 가장 나쁜 유형이다.   
 - system: 테이블의 row가 1개 밖에 없는 경우(=시스템 테이블)의 특별한 접근 방식   
 - const: 쿼리 실행시 테이블에 조건을 만족하는 row가 최대 1개인 경우로, 결과 row가 하나만 있기 때문에 결과 컬럼은 상수 취급된다.
-- eq_ref: primary key나 unique not null column으로 생성된 인덱스를 사용해 조인을 하는 경우로, 결과 row별로 조인되는 row가 하나만 있기 때문에 매우 빠르다.(ststem, const 유형 다음으로 빠름)   
+- eq_ref: primary key나 unique not null column으로 생성된 인덱스를 사용해 조인을 하는 경우로, 결과 row별로 조인되는 row가 하나만 있기 때문에 매우 빠르다.(system, const 유형 다음으로 빠름)   
 - ref: eq_ref 유형과는 다르게 인덱스로 사용된 키가 primary key나 unique not null column가 아닌 경우이다. 그렇기때문에 접근가능한 row가 여러개일 수 있다.   
 - fulltext: fulltext 인덱스를 사용하여 JOIN된 유형이다.   
 - ref_or_null: ref와 JOIN 유형이 비슷하지만, MySQL이 NULL을 포함하는 row에 대한 추가 검색을 수행한다는 점이 차이인 유형이다.   
@@ -86,3 +86,40 @@ Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	
 **filtered** - 테이블 조건으로 필터링된 테이블 row의 예상 백분율을 나타낸다. 즉, where절이 적용된 후 조회될 row의 예상 수를 말하며, 최대값 100은 row 필터링이 발생하지 않았음을 의미한다. 100에서 감소할수록 필터링 양이 증가함을 의미한다.
 
 **Extra** -  MySQL이 쿼리를 실행하는 방법에 대한 추가 정보를 나타낸다. 쿼리의 성능을 개선하거나 최적화하는데 중요한 항목이다.
+- Backward index scan
+- Child of 'table' pushed join@1
+- const row not found
+- Deleting all rows
+- Distinct
+- FirstMatch
+- Full scan on NULL key
+- Impossible HAVING
+- Impossible WHERE
+- Impossible WHERE noticed after reading const tables
+- LooseScan(m..n)
+- No matching min/max row
+- no matching row in const table
+- No matching rows after partition pruning
+- No tables used
+- Not exists
+- Plan isn't ready yet
+- Range checked for each record
+- Recursive
+- Rematerialize
+- Scanned N databases
+- Select tables optimized away
+- Skip_open_table, Open_frm_only, Open_full_table
+- Start temporary, End temporary
+- unique row not found
+- Using filesort
+- Using index
+- Using index condition
+- Using index for group-by
+- Using index for skip scan
+- Using join buffer (Block Nested Loop), Using join buffer (Batched Key Access), Using join buffer (hash join)
+- Using MRR
+- Using sort_union(...), Using union(...), Using intersect(...)
+- Using temporary
+- Using where
+- Using where with pushed condition
+- Zero limit
