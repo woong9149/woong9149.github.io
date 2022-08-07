@@ -101,7 +101,7 @@ Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	
 - no matching row in const table
 - No matching rows after partition pruning
 - No tables used
-- Not exists
+- Not exists: JOIN 관계인 A,B 테이블에서 A 테이블에는 존재하지만 B 테이블에는 존재하지 않는 값을 조회해야할 때 주로 **NOT IN (Sub query), NOT EXISTS** 연산자가 주로 사용 되며 이 때 나타나는 값이다. 흔히 ANTI JOIN이라고 하는 이 유형은, **OUTER JOIN**을 사용하면 동일한 처리를 더 빠른 성능으로 수행할 수 있다.
 - Plan isn't ready yet
 - Range checked for each record
 - Recursive
@@ -112,7 +112,7 @@ Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	
 - Start temporary, End temporary
 - unique row not found
 - Using filesort
-- Using index
+- Using index: 실제 row를 읽기 위해 테이블에 접근해 조건을 적용하는것이 아니라,  index tree의 정보만 사용하여 테이블에서 검색되는 경우를 의미한다.
 - Using index condition
 - Using index for group-by
 - Using index for skip scan
@@ -120,6 +120,6 @@ Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	
 - Using MRR
 - Using sort_union(...), Using union(...), Using intersect(...)
 - Using temporary
-- Using where
+- Using where: 테이블에서 row를 가져온 후 추가적으로 검색조건을 적용해 row의 범위를 제한했을 때를 의미한다. 특별히 테이블의 모든 row를 가져오거나 검사하려는 의도가 아니라면 **Extract값이 Using where이고 JOIN 유형이 ALL 혹은 index인 것은 쿼리에 문제가 있는 것**이다.
 - Using where with pushed condition
-- Zero limit
+- Zero limit: 쿼리에 LIMIT 0 절이 있어서 row를 선택할 수 없음을 의미한다.
