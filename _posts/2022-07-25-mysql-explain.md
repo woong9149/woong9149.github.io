@@ -90,7 +90,7 @@ Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	
 - Child of 'table' pushed join@1
 - const row not found
 - Deleting all rows
-- Distinct
+- Distinct: 조건을 만족하는 레코드를 찾았을 때 같은 조건을 만족하는 또 다른 레코드가 있는지 검사하지 않음을 의미한다.
 - FirstMatch
 - Full scan on NULL key
 - Impossible HAVING
@@ -119,7 +119,7 @@ Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	
 - Using join buffer (Block Nested Loop), Using join buffer (Batched Key Access), Using join buffer (hash join)
 - Using MRR
 - Using sort_union(...), Using union(...), Using intersect(...)
-- Using temporary
+- Using temporary: 주로 order by 나 group by 할 때  임시 테이블이 생성된 것을 표시한다.
 - Using where: 테이블에서 row를 가져온 후 추가적으로 검색조건을 적용해 row의 범위를 제한했을 때를 의미한다. 특별히 테이블의 모든 row를 가져오거나 검사하려는 의도가 아니라면 **Extract값이 Using where이고 JOIN 유형이 ALL 혹은 index인 것은 쿼리에 문제가 있는 것**이다.
 - Using where with pushed condition
 - Zero limit: 쿼리에 LIMIT 0 절이 있어서 row를 선택할 수 없음을 의미한다.
