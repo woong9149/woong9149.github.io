@@ -111,12 +111,12 @@ Explain을 실행했을 때 얻을 수 있는 결과 값들은 id,	select_type,	
 - Skip_open_table, Open_frm_only, Open_full_table
 - Start temporary, End temporary
 - unique row not found
-- Using filesort
+- Using filesort: 결과 row에 정렬이 필요할 때, ORDER BY 같은 인덱스로 해결하지 못하고 MySQL 자체적으로 filesort를 실행하는 것이다.(MySQL의 Quick sort라고도 함) 메모리나 디스크상에서 부가적인 정렬을 수행하는 것이기 때문에, 결과 row가 많으면 많을수록 성능에 큰 영향을 미친다.
 - Using index: 실제 row를 읽기 위해 테이블에 접근해 조건을 적용하는것이 아니라,  index tree의 정보만 사용하여 테이블에서 검색되는 경우를 의미한다.
-- Using index condition
+- Using index condition: 테이블은 전체 테이블 row를 읽을지 여부를 결정하기 위해, 먼저 인덱스 튜플에 접근해서 테스트하여 조회한다. 이러한 방식으로 인덱스 정보는 필요한 경우가 아니면 테이블의 전체 row  읽기 를 연기하는 pushdown 최적화를 하는데에 사용된다.
 - Using index for group-by
 - Using index for skip scan
-- Using join buffer (Block Nested Loop), Using join buffer (Batched Key Access), Using join buffer (hash join)
+- Using join buffer (Block Nested Loop), Using join buffer (Batched Key Access), Using join buffer (hash join): JOIN을 수행하는 데 있어서 최적의 인덱스가 없지만 차선의 인덱스를 사용하는 것을 의미한다. 매우 빠르다고는 할 수 없지만, 인덱스 없이 JOIN을 수행하는 것 보다는 빠른 효과를 볼 수 있다.
 - Using MRR
 - Using sort_union(...), Using union(...), Using intersect(...)
 - Using temporary: 주로 order by 나 group by 할 때  임시 테이블이 생성된 것을 표시한다.
